@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">NovelReader</string>
     <string name="Jianghu_reader">Jianghu Reader</string>
-    <string name="previous"><u>Prev</u></string>
-    <string name="next"><u>Next</u></string>
+    <string name="previous">Prev</string>
+    <string name="next">Next</string>
     <string name="lorem_ipsum">                                                                     Book 24, The Starlord of Fogstone, Chapter 1 – Leaving the Three Realms
                                                                      \n\n
                                                                      An Immortal estate located within the primordial chaos. This estate was a few kilometers in size, and it was filled with creeks, small streams, flowers, and grass.
@@ -48,4 +48,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+
+    <string name="title_activity_test">test</string>
 </resources>
