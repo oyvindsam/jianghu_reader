@@ -1,0 +1,126 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0099cc"
+    tools:context="com.example.samue.novelreader.ReadingActivity">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+
+    <ScrollView
+        android:id="@+id/fullscreen_content"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@android:color/black"
+        >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="6dp" >
+
+            <ProgressBar
+
+                android:id="@+id/progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="?android:attr/progressBarStyleLarge"
+                android:progressDrawable="@drawable/circular_progress_bar"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="16dp"
+                android:layout_centerHorizontal="true" />
+
+            <TextView
+                android:id="@+id/novel_name_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingTop="8dp"
+                android:textSize="18dp"
+                android:typeface="serif"
+                android:textColor="@color/colorLightGray"
+                tools:text="Header"
+                />
+
+            <LinearLayout
+                android:id="@+id/next_prev_layout_top"
+                android:layout_below="@id/novel_name_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginLeft="16dp">
+
+                <TextView
+                    android:id="@+id/prev_link_text_view"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/colorLightGray"
+                    android:textStyle=""
+                    android:typeface="serif"
+                    tools:text="Prev"/>
+
+                <TextView
+                    android:id="@+id/next_link_text_view"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/colorLightGray"
+                    android:typeface="serif"
+                    tools:text="Next"
+                    />
+            </LinearLayout>
+
+            <TextView
+                android:layout_below="@id/next_prev_layout_top"
+                android:id="@+id/main_text_view"
+                android:layout_marginTop="24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorLightGray"
+                android:textSize="15sp"
+                android:typeface="serif"
+                tools:text="@string/lorem_ipsum" />
+
+            <LinearLayout
+                android:id="@+id/next_prev_layout_bottom"
+                android:layout_below="@id/main_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginLeft="16dp">
+
+                <TextView
+                    android:id="@+id/prev_link_text_view_bottom"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/colorLightGray"
+                    android:textStyle=""
+                    android:typeface="serif" />
+
+                <TextView
+                    android:id="@+id/next_link_text_view_bottom"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/colorLightGray"
+                    android:typeface="serif"
+                    />
+            </LinearLayout>
+        </RelativeLayout>
+
+    </ScrollView>
+
+
+</FrameLayout>

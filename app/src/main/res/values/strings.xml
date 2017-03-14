@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">NovelReader</string>
+    <string name="Jianghu_reader">Jianghu Reader</string>
+    <string name="previous"><u>Prev</u></string>
+    <string name="next"><u>Next</u></string>
+    <string name="lorem_ipsum">                                                                     Book 24, The Starlord of Fogstone, Chapter 1 – Leaving the Three Realms
+                                                                     \n\n
+                                                                     An Immortal estate located within the primordial chaos. This estate was a few kilometers in size, and it was filled with creeks, small streams, flowers, and grass.
+                                                                     \n\n
+                                                                     “Father, will you live here permanently in the future? Won’t you return to the Three Realms?” Brightmoon held onto Ji Ning’s arm as she looked curiously at the area.
+                                                                     \n\n
+                                                                     “Yes. I plan to enter secluded meditation.” Ning nodded and smiled. “It will be a long time before I return to the Three Realms.”
+                                                                     \n\n
+                                                                     The lifeblood oath he had sworn was that he would leave the Three Realms within a thousand years of becoming an Elder God. Once this part of the oath became active, his soul would instantly become bound by its power. Even his Primaltwin would be affected. This was why, even though Ning intended to have his Primaltwin stand guard over the Three Realms, it couldn’t actually live within it. It had to reside in a part of the primordial chaos that was right next to the Three Realms.
+                                                                     \n\n
+                                                                     Only when he finished his lifeblood oath and actually carried Northrest’s final message to Vastheaven Palace would he be released from it.
+                                                                     \n\n
+                                                                     “Oh. That works as well, I guess. I’ll just spend a lot of time here in the future. This is actually my first time journeying into the primordial chaos.” Brightmoon was rather excited. “Father, I’m going to go take a look at some other places.
+                                                                     \n\n
+                                                                     “Go ahead.” Ning nodded.
+                                                                     \n\n
+                                                                     “Young master.” Autumn Leaf and Uncle White had accompanied Brightmoon here. They knew Ning very well…and they knew it made no sense that he had to remain within the primordial chaos while engaging in secluded meditation.
+                                                                     \n\n
+                                                                     “Ning, son, are you keeping things from us?” Uncle White asked, and Autumn Leaf looked towards Ning as well.
+                                                                     \n\n
+                                                                     “A few things.” Ning nodded. “There are some things I have to do. During the past period of time, I’ve been slowly working on rebuilding my Primaltwin. Now that its been restored and now that everything has been settled, I have to go take care of things. Don’t worry. My Primaltwin will remain here.”
+                                                                     \n\n
+                                                                     His true body would keep a spare clone behind as well, safely ensconced within the prisonworld.
+                                                                     \n\n
+                                                                     As for his Primaltwin’s spare clone, it would be kept safe within the Crescent major world.
+
+                                                                     During the Endwar, his Primaltwin had self-detonated. It was at the Ancestral Immortal level, and thus an absolutely inconceivable amount of chaos nectar would be needed if he wanted to immediately revive it. His only choice was to slowly rebuild it naturally. Ning had already mastered the Heavenly Dao of Water and had thus gained a certain degree of insight into the Heavenly Dao of Primordial Chaos. He was now capable of absorbing chaos energy and was thus able to constantly absorb a large amount of it, making the rebuilding process fairly quick.
+
+                                                                     His true body was a dual refiner and would need ten thousand years to rebuild. His Primaltwin was merely a Ki Refiner; only three thousand years was necessary. Thanks to the Heavengazer Tower, Ning was able to easily maintain a rate of time that was twenty times faster than normal. Thus, his Primaltwin had been rebuilt long ago. The only reason he had taken so long was because he had needed to spend a bit more time settling his affairs in the Three Realms.
+
+                                                                     “Young master…” Autumn Leaf said worriedly, “Let me go with you.”
+
+                                                                     “No need.” Ning shook his head.</string>
+
+    <string name="title_activity_reading">Reading</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="title_activity_fusltest">Fusltest</string>
+    <string name="title_activity_main_drawer">MainActivityDrawer</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+</resources>
