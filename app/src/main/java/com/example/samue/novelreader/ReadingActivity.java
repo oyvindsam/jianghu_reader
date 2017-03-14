@@ -2,6 +2,7 @@ package com.example.samue.novelreader;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -49,7 +50,7 @@ public class ReadingActivity extends AppCompatActivity {
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
      */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private static final int AUTO_HIDE_DELAY_MILLIS = 2000;
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -75,7 +76,6 @@ public class ReadingActivity extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
     };
-    private View mControlsView;
     private final Runnable mShowPart2Runnable = new Runnable() {
         @Override
         public void run() {
@@ -84,7 +84,6 @@ public class ReadingActivity extends AppCompatActivity {
             if (actionBar != null) {
                 actionBar.show();
             }
-            mControlsView.setVisibility(View.VISIBLE);
         }
     };
     private boolean mVisible;
@@ -116,7 +115,6 @@ public class ReadingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reading);
 
         mVisible = true;
-        //mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
 
 
@@ -140,6 +138,13 @@ public class ReadingActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mVisible = true;
+        toggle();
+    }
+
     // novelItems = (header, prevLink, nextLink, String novelText)
     public void setNovelText(final List<String> novelInfo) {
 
@@ -151,12 +156,24 @@ public class ReadingActivity extends AppCompatActivity {
         prevBottomTextView = (TextView) findViewById(R.id.prev_link_text_view_bottom);
         nextBottomTextView = (TextView) findViewById(R.id.next_link_text_view_bottom);
 
+        prevTextView.setPaintFlags(prevTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+        nextTextView.setPaintFlags(nextTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+        prevBottomTextView.setPaintFlags(prevBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+        nextBottomTextView.setPaintFlags(nextBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         novelTextView.setText(novelInfo.get(3));
         novelHeader.setText(novelInfo.get(0));
         prevTextView.setText(getString(R.string.previous));
         nextTextView.setText(getString(R.string.next));
         prevBottomTextView.setText(getString(R.string.previous));
         nextBottomTextView.setText(getString(R.string.next));
+
+        novelTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.v("scrollView", "toggle");
+                toggle();
+            }
+        });
 
         prevTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -247,9 +264,6 @@ public class ReadingActivity extends AppCompatActivity {
 
 
 
-
-
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -271,7 +285,9 @@ public class ReadingActivity extends AppCompatActivity {
     private void hide() {
         // Hide UI first
         ActionBar actionBar = getSupportActionBar();
+        Log.v("HIDE", "trying to hide");
         if (actionBar != null) {
+        Log.v("HIDE", "hiding");
             actionBar.hide();
         }
         mVisible = false;
