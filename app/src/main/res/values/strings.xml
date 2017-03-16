@@ -1,8 +1,21 @@
 <resources>
-    <string name="app_name">NovelReader</string>
-    <string name="Jianghu_reader">Jianghu Reader</string>
+    <string name="app_name">Jianghu Reader</string>
     <string name="previous">Prev</string>
     <string name="next">Next</string>
+   <string name="title_activity_reading">Reading</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="title_activity_fusltest">Fusltest</string>
+    <string name="title_activity_main_drawer">MainActivityDrawer</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="title_activity_test">test</string>
+
     <string name="lorem_ipsum">                                                                     Book 24, The Starlord of Fogstone, Chapter 1 – Leaving the Three Realms
                                                                      \n\n
                                                                      An Immortal estate located within the primordial chaos. This estate was a few kilometers in size, and it was filled with creeks, small streams, flowers, and grass.
@@ -37,17 +50,5 @@
 
                                                                      “No need.” Ning shook his head.</string>
 
-    <string name="title_activity_reading">Reading</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
 
-    <string name="title_activity_fusltest">Fusltest</string>
-    <string name="title_activity_main_drawer">MainActivityDrawer</string>
-
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-
-    <string name="action_settings">Settings</string>
-
-    <string name="title_activity_test">test</string>
 </resources>

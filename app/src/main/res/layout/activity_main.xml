@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         style="@style/HeaderText"
-        android:text="@string/Jianghu_reader"
+        android:text="@string/app_name"
         tools:text="Jianghu Reader"/>
 
     <GridView
