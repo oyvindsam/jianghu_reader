@@ -1,11 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:background="@android:color/black">
+
+    <ProgressBar
+        android:elevation="1dp"
+        android:id="@+id/progress_bar_chapter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="32dp"
+        android:layout_centerHorizontal="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/novel_name_header_chapter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            style="@style/HeaderText"
+            tools:text="Header"
+            />
 
     <GridView
         android:id="@+id/chapter_list"
@@ -16,6 +41,9 @@
         android:verticalSpacing="10dp"
         android:horizontalSpacing="10dp"
         android:stretchMode="columnWidth"
+        style="@style/ScrollbarThumb"
         tools:text="Dummy text"/>
 
-</LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>

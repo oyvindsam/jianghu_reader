@@ -3,14 +3,17 @@ package com.example.samue.novelreader;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -24,6 +27,10 @@ import org.jsoup.select.Elements;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.endX;
+import static android.R.attr.readPermission;
+import static android.R.attr.startX;
+import static android.R.attr.startY;
 import static android.media.CamcorderProfile.get;
 import static org.jsoup.nodes.Document.OutputSettings.Syntax.html;
 
@@ -33,12 +40,19 @@ import static org.jsoup.nodes.Document.OutputSettings.Syntax.html;
  */
 public class ReadingActivity extends AppCompatActivity {
 
+    private static double MAX_SCREEN_Y_COORDINATE = 2559.0;
+    private static double MAX_SCREEN_X_COORDINATE = 1418.0;
+
     String novelLink;
     String novelName;
     ScrollView scrollView;
     TextView novelTextView, novelHeader, prevTextView, nextTextView, prevBottomTextView,
             nextBottomTextView;
     ProgressBar progress;
+
+    Display mdisp;
+    Point mdispSize;
+    int maxY, touchSlop;
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -50,7 +64,7 @@ public class ReadingActivity extends AppCompatActivity {
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
      */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 2000;
+    private static final int AUTO_HIDE_DELAY_MILLIS = 1000;
 
     /**
      * Some older devices needs a small delay between UI widget updates
@@ -86,6 +100,14 @@ public class ReadingActivity extends AppCompatActivity {
             }
         }
     };
+
+    private final Runnable mToggleScrollBar = new Runnable() {
+        @Override
+        public void run() {
+            scrollView.setVerticalScrollBarEnabled(false);
+        }
+    };
+
     private boolean mVisible;
     private final Runnable mHideRunnable = new Runnable() {
         @Override
@@ -133,7 +155,17 @@ public class ReadingActivity extends AppCompatActivity {
         Intent intent = getIntent();
         novelLink = intent.getStringExtra(MainActivity.EXTRA_LINK);
         novelName = intent.getStringExtra(MainActivity.EXTRA_NOVEL_NAME);
-        progress = (ProgressBar) findViewById(R.id.progress_bar);
+        progress = (ProgressBar) findViewById(R.id.progress_bar_novel);
+
+
+        mdisp = getWindowManager().getDefaultDisplay(); // Display
+        mdispSize = new Point(); // Point
+        mdisp.getSize(mdispSize);
+        maxY = mdispSize.y; // Max y coordinate => bottom of display
+
+        touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+
+
         new ParseReadingPage().execute();
 
     }
@@ -150,12 +182,13 @@ public class ReadingActivity extends AppCompatActivity {
 
         scrollView = (ScrollView) findViewById(R.id.fullscreen_content);
         novelTextView = (TextView) findViewById(R.id.main_text_view);
-        novelHeader = (TextView) findViewById(R.id.novel_name_header);
+        novelHeader = (TextView) findViewById(R.id.novel_name_header_novel);
         prevTextView = (TextView) findViewById(R.id.prev_link_text_view);
         nextTextView = (TextView) findViewById(R.id.next_link_text_view);
         prevBottomTextView = (TextView) findViewById(R.id.prev_link_text_view_bottom);
         nextBottomTextView = (TextView) findViewById(R.id.next_link_text_view_bottom);
 
+        scrollView.setVerticalScrollBarEnabled(false);
         prevTextView.setPaintFlags(prevTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         nextTextView.setPaintFlags(nextTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         prevBottomTextView.setPaintFlags(prevBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
@@ -167,11 +200,45 @@ public class ReadingActivity extends AppCompatActivity {
         prevBottomTextView.setText(getString(R.string.previous));
         nextBottomTextView.setText(getString(R.string.next));
 
-        novelTextView.setOnClickListener(new View.OnClickListener() {
+
+        Log.v("maxy: ", "" + maxY);
+
+        // Registers touch events relative to screen and does one of 3: page up, toggle immersive
+        // mode, page down.
+        novelTextView.setOnTouchListener(new View.OnTouchListener() {
+            float startX, startY, endX, endY, dX, dY;
             @Override
-            public void onClick(View view) {
-                Log.v("scrollView", "toggle");
-                toggle();
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    startX = event.getRawX();
+                    startY = event.getRawY();
+                    Log.v("RawX: ", "" + startX);
+                }
+
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    endX = event.getRawX();
+                    endY = event.getRawY();
+                    dX = Math.abs(endX - startX);
+                    dY = Math.abs(endY - startY);
+
+                    double touchMove = (Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2)));
+                    double touchLocationY = Math.floor((startY / MAX_SCREEN_Y_COORDINATE) * 100);
+                    double touchLocationX = Math.floor((startX / MAX_SCREEN_X_COORDINATE) * 100);
+
+                    if (touchMove <= touchSlop) { // touchSlop is computed by the system, and tells
+                        if ((touchLocationY > 30 && touchLocationY < 70) && (touchLocationX > 30 &&
+                            touchLocationX < 70)) { // middle of screen 30 - 70% both x, y
+                            toggle(); // toggle immersive mode
+                            scrollView.setVerticalScrollBarEnabled(true);
+                        }
+                        else if (touchLocationY < 50) { // Upper part of screen 0 - 40%
+                            scrollView.scrollBy(0, -(maxY - 20)); // scroll up
+                        } else { // lower part of screen 70% +
+                            scrollView.scrollBy(0, +(maxY - 20)); // scroll down
+                        }
+                    }
+                }
+                return true;
             }
         });
 
@@ -237,7 +304,7 @@ public class ReadingActivity extends AppCompatActivity {
                     }
                 }
                 for (Element p : paragraphElements) {
-                    if (!p.text().contains("Previous Chapter") && !p.text().contains("Previous Chapter")) {
+                    if (!p.text().contains("Previous Chapter") && !p.text().contains("Next Chapter")) {
                         Log.v("Text: ", p.text());
                         htmlParse += p.text().trim() + "\n\n";
                     }
@@ -247,10 +314,7 @@ public class ReadingActivity extends AppCompatActivity {
                 novelInfo.add(nextLink);
                 novelInfo.add(htmlParse);
 
-
             } catch (Exception e) { Log.e("main", ""+e);}
-
-
             return null;
         }
 
@@ -285,9 +349,7 @@ public class ReadingActivity extends AppCompatActivity {
     private void hide() {
         // Hide UI first
         ActionBar actionBar = getSupportActionBar();
-        Log.v("HIDE", "trying to hide");
         if (actionBar != null) {
-        Log.v("HIDE", "hiding");
             actionBar.hide();
         }
         mVisible = false;
@@ -295,6 +357,8 @@ public class ReadingActivity extends AppCompatActivity {
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+        mHideHandler.postDelayed(mToggleScrollBar, AUTO_HIDE_DELAY_MILLIS);
+
     }
 
     @SuppressLint("InlinedApi")

@@ -43,9 +43,6 @@ public class LinkAdapter extends ArrayAdapter<Novel> {
         //novelName.setTextColor(Color.WHITE);
         novelName.setText(currentNovel.getNovelName());
 
-        TextView novelNameChinese = (TextView) listItemView.findViewById(R.id.novel_chinese_name);
-        novelNameChinese.setTextColor(Color.WHITE);
-        novelNameChinese.setText(currentNovel.getChineseName());
 
 
         listItemView.setOnClickListener(new View.OnClickListener() {

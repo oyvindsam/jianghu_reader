@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,6 +9,17 @@
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
 
+    <ProgressBar
+        android:elevation="1dp"
+        android:id="@+id/progress_bar_novel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="32dp"
+        android:layout_centerHorizontal="true" />
+
     <ScrollView
         android:id="@+id/fullscreen_content"
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -16,39 +27,29 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@android:color/black"
+        style="@style/ScrollbarThumb"
+        android:fadeScrollbars="false"
         >
 
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:padding="6dp" >
-
-            <ProgressBar
-
-                android:id="@+id/progress_bar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="?android:attr/progressBarStyleLarge"
-                android:progressDrawable="@drawable/circular_progress_bar"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="16dp"
-                android:layout_centerHorizontal="true" />
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:paddingBottom="6dp" >
 
             <TextView
-                android:id="@+id/novel_name_header"
+                android:id="@+id/novel_name_header_novel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:paddingTop="8dp"
-                android:textSize="18dp"
-                android:typeface="serif"
-                android:textColor="@color/colorLightGray"
+                style="@style/HeaderText"
                 tools:text="Header"
                 />
 
             <LinearLayout
                 android:id="@+id/next_prev_layout_top"
-                android:layout_below="@id/novel_name_header"
+                android:layout_below="@id/novel_name_header_novel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -81,12 +82,9 @@
             <TextView
                 android:id="@+id/main_text_view"
                 android:layout_below="@id/next_prev_layout_top"
-                android:layout_marginTop="24dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorLightGray"
-                android:textSize="15sp"
-                android:typeface="serif"
+                style="@style/NovelText"
                 tools:text="@string/lorem_ipsum" />
 
             <LinearLayout
@@ -123,4 +121,4 @@
     </ScrollView>
 
 
-</FrameLayout>
+</RelativeLayout>

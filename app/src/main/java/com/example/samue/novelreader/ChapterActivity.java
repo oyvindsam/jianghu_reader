@@ -5,7 +5,10 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.GridView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,6 +21,8 @@ public class ChapterActivity extends AppCompatActivity {
 
     private String chapterLink, novelName;
     GridView novelChaptersTextView;
+    TextView novelHeader;
+    ProgressBar progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +31,10 @@ public class ChapterActivity extends AppCompatActivity {
         Intent intent = getIntent();
         chapterLink = intent.getStringExtra(MainActivity.EXTRA_LINK);
         novelName = intent.getStringExtra(MainActivity.EXTRA_NOVEL_NAME);
-
+        progress = (ProgressBar) findViewById(R.id.progress_bar_chapter);
+        novelHeader = (TextView) findViewById(R.id.novel_name_header_chapter);
+        progress.setVisibility(View.VISIBLE);
+        novelHeader.setText(novelName);
 
         new ParseNovelChapters().execute();
     }
@@ -36,6 +44,8 @@ public class ChapterActivity extends AppCompatActivity {
         ChapterAdapter adapter = new ChapterAdapter(this, chapterLinks);
 
         novelChaptersTextView.setAdapter(adapter);
+        progress.setVisibility(View.INVISIBLE);
+
     }
 
     class ParseNovelChapters extends AsyncTask<Void, Void, Void> {

@@ -31,12 +31,12 @@ public class ChapterAdapter extends ArrayAdapter<Chapter> {
     public View getView(int position, View convertView, ViewGroup parent) {
         View listItemView = convertView;
         if (listItemView == null) {
-            listItemView = LayoutInflater.from(getContext()).inflate(R.layout.novel_item, parent, false);
+            listItemView = LayoutInflater.from(getContext()).inflate(R.layout.chapter_item, parent, false);
         }
 
         final Chapter currentChapter = getItem(position);
 
-        TextView chapterName = (TextView) listItemView.findViewById(R.id.novel_name);
+        TextView chapterName = (TextView) listItemView.findViewById(R.id.chapter_name);
         chapterName.setText(currentChapter.getChapterName());
 
 

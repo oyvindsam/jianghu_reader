@@ -6,14 +6,23 @@
     android:layout_height="fill_parent"
     android:background="@android:color/black">
 
+    <ProgressBar
+        android:elevation="1dp"
+        android:id="@+id/progress_bar_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyleLarge"
+        android:progressDrawable="@drawable/circular_progress_bar"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="32dp"
+        android:layout_centerHorizontal="true" />
+
     <TextView
         android:id="@+id/app_name_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="15dp"
-        android:textSize="18sp"
         android:gravity="center"
-        android:textColor="@android:color/white"
+        style="@style/HeaderText"
         android:text="@string/Jianghu_reader"
         tools:text="Jianghu Reader"/>
 
@@ -27,6 +36,8 @@
         android:horizontalSpacing="10dp"
         android:stretchMode="columnWidth"
         android:gravity="center"
+        style="@style/ScrollbarThumb"
+        android:scrollbarStyle="outsideOverlay"
         tools:text="Dummy text"/>
 
 </RelativeLayout>

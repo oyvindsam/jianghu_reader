@@ -6,12 +6,10 @@ package com.example.samue.novelreader;
 
 public class Novel {
     private String novelName;
-    private String chineseName;
     private String novelLink;
 
-    public Novel(String name, String chinese, String link) {
+    public Novel(String name, String link) {
         novelName = name;
-        chineseName = chinese;
         novelLink = link;
     }
 
@@ -19,9 +17,6 @@ public class Novel {
         return novelName;
     }
 
-    public String getChineseName() {
-        return chineseName;
-    }
 
     public String getNovelLink() {
         return novelLink;

@@ -26,4 +26,35 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="HeaderText" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/colorLightGray</item>
+        <item name="android:typeface">serif</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+
+    </style>
+
+    <style name="NovelText" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/colorLightGray</item>
+        <item name="android:typeface">serif</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:paddingTop">24dp</item>
+    </style>
+
+    <style name="TextGridView" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/colorLightGray</item>
+        <item name="android:typeface">serif</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:lines">2</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="ScrollbarThumb">
+        <item name="android:scrollbarSize">3dp</item>
+        <item name="android:scrollbarTrackVertical">@android:color/transparent</item>
+        <item name="android:scrollbarThumbVertical">@color/colorDarkGray</item>
+    </style>
+
 </resources>

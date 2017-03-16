@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -35,11 +36,15 @@ public class MainActivity extends AppCompatActivity {
     public static String EXTRA_NOVEL_NAME = "com.example.samue.novelreader.NOVEL_NAME";
 
     GridView novelLinksTextView;
+    ProgressBar progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        progress = (ProgressBar) findViewById(R.id.progress_bar_main);
+        progress.setVisibility(View.VISIBLE);
+
         new ParseNovelsPage().execute();
 
     }
@@ -49,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
         LinkAdapter adapter = new LinkAdapter(this, novelLinks);
 
         novelLinksTextView.setAdapter(adapter);
+        progress.setVisibility(View.INVISIBLE);
+
     }
 
 
@@ -64,10 +71,9 @@ public class MainActivity extends AppCompatActivity {
                 for (Element link : links) {
                     if (link.text().contains("(")) {
                         String[] nameSplit = link.text().split("[(]");
-                        String chinese = nameSplit[1].substring(0, nameSplit[1].length() -1);
-                        tempNovelNames.add(new Novel(nameSplit[0].trim(), chinese, link.attr("href")));
+                        tempNovelNames.add(new Novel(nameSplit[0].trim(), link.attr("href")));
                     } else {
-                        tempNovelNames.add(new Novel(link.text(), "", link.attr("href")));
+                        tempNovelNames.add(new Novel(link.text(), link.attr("href")));
                     }
                 }
             } catch (Exception e) { Log.e("main", ""+e);}
