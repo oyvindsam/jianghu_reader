@@ -9,6 +9,7 @@ TODO:
 -Intent receiver on wuxiaworld domains
 -Update and clean up ASyncTask with progress start stop
 -Add favorites (with adding, saving feature) 
+
 -MainActivity: show favorites, button to show all, support for different sites etc.
 -Clean up chapter display (categories, sort)
 -ScrollView: add snap text to screen border 
