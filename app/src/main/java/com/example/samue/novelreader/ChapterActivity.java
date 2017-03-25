@@ -25,51 +25,40 @@ import static com.example.samue.novelreader.MainActivity.FROM_READING;
 
 public class ChapterActivity extends AppCompatActivity {
 
-
     private String chapterLink;
-    GridView novelChaptersTextView;
-    TextView novelHeader;
-    ProgressBar progress;
+    private GridView novelChaptersTextView;
+    private TextView novelHeader;
+    private ProgressBar progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chapter);
+
         progress = (ProgressBar) findViewById(R.id.progress_bar_chapter);
         novelHeader = (TextView) findViewById(R.id.novel_name_header_chapter);
-        progress.setVisibility(View.VISIBLE);
+        novelChaptersTextView = (GridView) findViewById(R.id.chapter_list);
         novelHeader.setText("Loading...");
+        progress.setVisibility(View.VISIBLE);
 
         Intent intent = getIntent();
         chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
-        /*if (intent != null) {
-            String strData = intent.getExtras().getString(APPLICATION_ID);
-            if (strData.equals(FROM_MAIN)) {
-                chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
-            } else if (strData.equals(FROM_READING)) {
-                chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
-            }
-        }*/
-        Log.v("chapterLink: ", chapterLink);
 
         new ParseNovelChapters().execute();
     }
 
     public void setChapterLinks(ArrayList<Chapter> chapterLinks) {
-        novelChaptersTextView = (GridView) findViewById(R.id.chapter_list);
         ChapterAdapter adapter = new ChapterAdapter(this, chapterLinks);
-
         novelChaptersTextView.setAdapter(adapter);
         progress.setVisibility(View.INVISIBLE);
-
     }
 
     class ParseNovelChapters extends AsyncTask<Void, Void, Void> {
         ArrayList<Chapter> tempChapterNames = new ArrayList<>();
         String novelName = "";
+
         @Override
         protected Void doInBackground(Void... params) {
-
             try {
                 Document doc = Jsoup.connect(chapterLink).get();
                 novelName = doc.select("h1[class=entry-title]").text();
@@ -100,4 +89,5 @@ public class ChapterActivity extends AppCompatActivity {
         }
 
     }
+
 }

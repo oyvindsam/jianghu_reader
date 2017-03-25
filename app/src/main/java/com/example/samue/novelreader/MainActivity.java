@@ -24,20 +24,22 @@ public class MainActivity extends AppCompatActivity {
     private static String WUXIAWORLD = "http://www.wuxiaworld.com/";
 
     GridView novelLinksTextView;
+    LinkAdapter adapter;
     ProgressBar progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        progress = (ProgressBar) findViewById(R.id.progress_bar_main);
-        novelLinksTextView = (GridView) findViewById(R.id.novel_list);
 
+        progress = (ProgressBar) findViewById(R.id.progress_bar_main);
+
+        novelLinksTextView = (GridView) findViewById(R.id.novel_list);
         new ParseNovelsPage().execute(WUXIAWORLD);
     }
 
     public void setNovelLinks(ArrayList<Novel> novelLinks) {
-        LinkAdapter adapter = new LinkAdapter(this, novelLinks);
+        adapter = new LinkAdapter(this, novelLinks);
         novelLinksTextView.setAdapter(adapter);
         progress.setVisibility(View.INVISIBLE);
     }
@@ -59,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
                 Elements elements = doc.select("li[id=menu-item-2165]"); // select menu item
                 Elements links = elements.select("a[href]"); // get all links i an array
                 links.remove(0); // first link redundant
-
                 for (Element link : links) {
                     if (link.text().contains("(")) { // chinese name inside brackets ()
                         String[] nameSplit = link.text().split("[(]"); // nameSlipt = { "english", "chinese"}
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException IOE) {
                 Log.e("MainActivity -IOE- ", "" + IOE);
             }
-            return null;
+            return tempNovelNames;
         }
 
         @Override
