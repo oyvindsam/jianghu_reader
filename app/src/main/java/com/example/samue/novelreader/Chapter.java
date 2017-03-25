@@ -6,13 +6,11 @@ package com.example.samue.novelreader;
 
 public class Chapter {
 
-    private String novelName;
     private String chapterNr;
     private String chapterName;
     private String chapterLink;
 
-    public Chapter(String novelName, String chapterNr, String chapterName, String chapterLink) {
-        this.novelName = novelName;
+    public Chapter(String chapterNr, String chapterName, String chapterLink) {
         this.chapterNr = chapterNr;
         this.chapterName = chapterName;
         this.chapterLink = chapterLink;
@@ -30,7 +28,4 @@ public class Chapter {
         return chapterLink;
     }
 
-    public String getNovelName() {
-        return novelName;
-    }
 }

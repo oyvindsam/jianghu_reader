@@ -55,11 +55,11 @@ public class ChapterActivity extends AppCompatActivity {
 
             try {
                 Document doc = Jsoup.connect(chapterLink).get();
-                Elements elements = doc.select("div[itemprop=articleBody]");
-                Elements links = elements.select("a[href]");
+                Elements elements = doc.select("div[itemprop=articleBody]"); // area where links are
+                Elements links = elements.select("a[href]"); // all links
                 for (Element link : links) {
                     if (link.text().contains("Chapter")) {
-                        tempChapterNames.add(new Chapter(novelName, link.id(), link.text(), link.attr("href")));
+                        tempChapterNames.add(new Chapter(link.id(), link.text(), link.attr("href")));
                     }
                 }
             } catch (Exception e) { Log.e("main", ""+e);}

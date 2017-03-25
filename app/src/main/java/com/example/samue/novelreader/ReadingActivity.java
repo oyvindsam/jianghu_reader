@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -44,7 +45,6 @@ public class ReadingActivity extends AppCompatActivity {
     private static double MAX_SCREEN_X_COORDINATE = 1418.0;
 
     String novelLink;
-    String novelName;
     ScrollView scrollView;
     TextView novelTextView, novelHeader, prevTextView, nextTextView, prevBottomTextView,
             nextBottomTextView;
@@ -153,9 +153,15 @@ public class ReadingActivity extends AppCompatActivity {
         // while interacting with the UI.
 
         Intent intent = getIntent();
-        novelLink = intent.getStringExtra(MainActivity.EXTRA_LINK);
-        novelName = intent.getStringExtra(MainActivity.EXTRA_NOVEL_NAME);
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri data = intent.getData();
+            novelLink = data.toString();
+            Log.v("Intent-----", novelLink);
+        } else {
+            novelLink = intent.getStringExtra(MainActivity.EXTRA_LINK);
+        }
         progress = (ProgressBar) findViewById(R.id.progress_bar_novel);
+
 
 
         mdisp = getWindowManager().getDefaultDisplay(); // Display

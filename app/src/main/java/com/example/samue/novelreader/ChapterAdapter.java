@@ -45,13 +45,7 @@ public class ChapterAdapter extends ArrayAdapter<Chapter> {
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), ReadingActivity.class);
                 intent.putExtra(EXTRA_LINK, currentChapter.getChapterLink());
-                intent.putExtra(EXTRA_NOVEL_NAME, currentChapter.getNovelName());
                 getContext().startActivity(intent);
-
-                /*
-                Intent intent = new Intent(getContext(), ReadingActivity.class);
-                intent.putExtra(EXTRA_LINK, currentNovel.getNovelLink());
-                getContext().startActivity(intent); */
             }
         });
 
