@@ -166,7 +166,7 @@ public class ReadingActivity extends AppCompatActivity {
         touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
 
 
-        new ParseReadingPage().execute();
+        new ParseReadingPage().execute(novelLink);
 
     }
 
@@ -247,7 +247,6 @@ public class ReadingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 novelLink = novelInfo.get(1);
                 new ParseReadingPage().execute();
-                progress.setVisibility(View.VISIBLE);
             }
         });
 
@@ -256,7 +255,6 @@ public class ReadingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 novelLink = novelInfo.get(2);
                 new ParseReadingPage().execute();
-                progress.setVisibility(View.VISIBLE);
             }
         });
 
@@ -265,7 +263,6 @@ public class ReadingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 novelLink = novelInfo.get(1);
                 new ParseReadingPage().execute();
-                progress.setVisibility(View.VISIBLE);
             }
         });
 
@@ -274,27 +271,32 @@ public class ReadingActivity extends AppCompatActivity {
             public void onClick(View v) {
                 novelLink = novelInfo.get(2);
                 new ParseReadingPage().execute();
-                progress.setVisibility(View.VISIBLE);
             }
         });
         scrollView.fullScroll(ScrollView.FOCUS_UP);
         progress.setVisibility(View.INVISIBLE);
     }
 
-    public class ParseReadingPage extends AsyncTask<Void, Void, Void> {
-
-        List<String> novelInfo = new ArrayList<String>();
-        String htmlParse = "";
-        String prevLink = "";
-        String nextLink = "";
+    public class ParseReadingPage extends AsyncTask<String, Void, List<String>> {
         @Override
-        protected Void doInBackground(Void... params) {
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progress.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected List<String> doInBackground(String... linkList) {
+            List<String> novelInfo = new ArrayList<String>();
+            String htmlParse = "";
+            String prevLink = "";
+            String nextLink = "";
             try {
-                Document doc = Jsoup.connect(novelLink).get();
+                Document doc = Jsoup.connect(linkList[0]).get();
                 String novelHeader = doc.select("h1[class=entry-title]").text();
                 Elements elements = doc.select("div[itemprop=articleBody]");
                 Elements links = doc.select("a[href]");
                 Elements paragraphElements = elements.select("p");
+                // Add cancel method and mor try catch.
                 for (Element link : links) {
                     if (link.text().equals("Previous Chapter") && prevLink.length() < 1) {
                         prevLink += link.attr("href");
@@ -315,18 +317,15 @@ public class ReadingActivity extends AppCompatActivity {
                 novelInfo.add(htmlParse);
 
             } catch (Exception e) { Log.e("main", ""+e);}
-            return null;
+            return novelInfo;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(List<String> result) {
             super.onPreExecute();
-            setNovelText(novelInfo);
+            setNovelText(result);
         }
-
     }
-
-
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
