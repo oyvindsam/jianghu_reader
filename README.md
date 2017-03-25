@@ -7,9 +7,9 @@ TODO:
 
 -Fix scroll to top 
 
--Intent receiver on wuxiaworld domains
+-Intent receiver on wuxiaworld domains. checked
 
--Update and clean up ASyncTask with progress start stop
+-Update and clean up ASyncTask. better error handling
 
 -Add favorites (with adding, saving feature) 
 
