@@ -28,12 +28,9 @@ import org.jsoup.select.Elements;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.R.attr.endX;
-import static android.R.attr.readPermission;
-import static android.R.attr.startX;
-import static android.R.attr.startY;
-import static android.media.CamcorderProfile.get;
-import static org.jsoup.nodes.Document.OutputSettings.Syntax.html;
+import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_NAME;
+import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_LINK;
+
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -156,10 +153,18 @@ public class ReadingActivity extends AppCompatActivity {
         if (Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri data = intent.getData();
             novelLink = data.toString();
-            Log.v("Intent-----", novelLink);
+            if (novelLink.endsWith("-index/")) { // dirty hack in case intent is to chapter page
+                Log.v("Registr (index ends) ", novelLink);
+                Intent intent2 = new Intent(this, ChapterActivity.class);
+                intent2.putExtra(EXTRA_NOVEL_LINK, novelLink);
+                this.startActivity(intent2);
+                this.finish();
+                return;
+            }
         } else {
-            novelLink = intent.getStringExtra(MainActivity.EXTRA_LINK);
+            novelLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
         }
+        Log.v("Registrerd novelLink-: ", novelLink);
         progress = (ProgressBar) findViewById(R.id.progress_bar_novel);
 
 
@@ -296,9 +301,10 @@ public class ReadingActivity extends AppCompatActivity {
             String htmlParse = "";
             String prevLink = "";
             String nextLink = "";
+            String novelHeader = "";
             try {
                 Document doc = Jsoup.connect(linkList[0]).get();
-                String novelHeader = doc.select("h1[class=entry-title]").text();
+                novelHeader = doc.select("h1[class=entry-title]").text();
                 Elements elements = doc.select("div[itemprop=articleBody]");
                 Elements links = doc.select("a[href]");
                 Elements paragraphElements = elements.select("p");

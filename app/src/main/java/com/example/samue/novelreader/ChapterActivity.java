@@ -17,9 +17,16 @@ import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 
+import static com.example.samue.novelreader.MainActivity.APPLICATION_ID;
+import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_NAME;
+import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_LINK;
+import static com.example.samue.novelreader.MainActivity.FROM_MAIN;
+import static com.example.samue.novelreader.MainActivity.FROM_READING;
+
 public class ChapterActivity extends AppCompatActivity {
 
-    private String chapterLink, novelName;
+
+    private String chapterLink;
     GridView novelChaptersTextView;
     TextView novelHeader;
     ProgressBar progress;
@@ -28,13 +35,22 @@ public class ChapterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chapter);
-        Intent intent = getIntent();
-        chapterLink = intent.getStringExtra(MainActivity.EXTRA_LINK);
-        novelName = intent.getStringExtra(MainActivity.EXTRA_NOVEL_NAME);
         progress = (ProgressBar) findViewById(R.id.progress_bar_chapter);
         novelHeader = (TextView) findViewById(R.id.novel_name_header_chapter);
         progress.setVisibility(View.VISIBLE);
-        novelHeader.setText(novelName);
+        novelHeader.setText("Loading...");
+
+        Intent intent = getIntent();
+        chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
+        /*if (intent != null) {
+            String strData = intent.getExtras().getString(APPLICATION_ID);
+            if (strData.equals(FROM_MAIN)) {
+                chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
+            } else if (strData.equals(FROM_READING)) {
+                chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
+            }
+        }*/
+        Log.v("chapterLink: ", chapterLink);
 
         new ParseNovelChapters().execute();
     }
@@ -50,11 +66,21 @@ public class ChapterActivity extends AppCompatActivity {
 
     class ParseNovelChapters extends AsyncTask<Void, Void, Void> {
         ArrayList<Chapter> tempChapterNames = new ArrayList<>();
+        String novelName = "";
         @Override
         protected Void doInBackground(Void... params) {
 
             try {
                 Document doc = Jsoup.connect(chapterLink).get();
+                novelName = doc.select("h1[class=entry-title]").text();
+                if (novelName.contains("(")) { // chinese name inside brackets ()
+                    String[] nameSplit = novelName.split("[(]"); // nameSlipt = { "english", "chinese"}
+                    novelName = nameSplit[0].trim();
+                }
+                if (novelName.contains("–")) {
+                    String[] nameSplit = novelName.split("[–]");
+                    novelName = nameSplit[0];
+                }
                 Elements elements = doc.select("div[itemprop=articleBody]"); // area where links are
                 Elements links = elements.select("a[href]"); // all links
                 for (Element link : links) {
@@ -69,6 +95,7 @@ public class ChapterActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result) {
             super.onPreExecute();
+            novelHeader.setText(novelName);
             setChapterLinks(tempChapterNames);
         }
 

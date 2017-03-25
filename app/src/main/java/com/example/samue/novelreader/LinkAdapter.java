@@ -14,8 +14,11 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import static com.example.samue.novelreader.MainActivity.EXTRA_LINK;
+import static android.os.Build.ID;
+import static com.example.samue.novelreader.MainActivity.APPLICATION_ID;
+import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_LINK;
 import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_NAME;
+import static com.example.samue.novelreader.MainActivity.APPLICATION_ID;
 
 /**
  * Created by samue on 14.03.2017.
@@ -49,7 +52,8 @@ public class LinkAdapter extends ArrayAdapter<Novel> {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), ChapterActivity.class);
-                intent.putExtra(EXTRA_LINK, currentNovel.getNovelLink());
+                intent.putExtra(APPLICATION_ID, "MAIN");
+                intent.putExtra(EXTRA_NOVEL_LINK, currentNovel.getNovelLink());
                 intent.putExtra(EXTRA_NOVEL_NAME, currentNovel.getNovelName());
                 getContext().startActivity(intent);
             }

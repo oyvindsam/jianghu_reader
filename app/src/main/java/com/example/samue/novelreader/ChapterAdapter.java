@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import static com.example.samue.novelreader.MainActivity.EXTRA_LINK;
+import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_LINK;
 import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_NAME;
 
 /**
@@ -44,7 +44,7 @@ public class ChapterAdapter extends ArrayAdapter<Chapter> {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), ReadingActivity.class);
-                intent.putExtra(EXTRA_LINK, currentChapter.getChapterLink());
+                intent.putExtra(EXTRA_NOVEL_LINK, currentChapter.getChapterLink());
                 getContext().startActivity(intent);
             }
         });

@@ -20,8 +20,11 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static String EXTRA_LINK = "com.example.samue.novelreader.LINK";
+    public static String APPLICATION_ID = "com.example.samue.novelreader";
+    public static String FROM_MAIN = "com.example.samue.novelreader.MainActivity";
+    public static String FROM_READING = "com.example.samue.novelreader.ReadingActivity";
     public static String EXTRA_NOVEL_NAME = "com.example.samue.novelreader.NOVEL_NAME";
+    public static String EXTRA_NOVEL_LINK = "com.example.samue.novelreader.NOVEL_LINK";
 
     GridView novelLinksTextView;
     ProgressBar progress;
