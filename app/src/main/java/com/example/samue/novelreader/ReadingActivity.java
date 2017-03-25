@@ -17,25 +17,18 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
-import android.widget.Spinner;
 import android.widget.TextView;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_NAME;
 import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_LINK;
 
-
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class ReadingActivity extends AppCompatActivity {
 
     private static double MAX_SCREEN_Y_COORDINATE = 2559.0;
@@ -149,48 +142,6 @@ public class ReadingActivity extends AppCompatActivity {
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
 
-        Intent intent = getIntent();
-        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-            Uri data = intent.getData();
-            novelLink = data.toString();
-            if (novelLink.endsWith("-index/")) { // dirty hack in case intent is to chapter page
-                Log.v("Registr (index ends) ", novelLink);
-                Intent intent2 = new Intent(this, ChapterActivity.class);
-                intent2.putExtra(EXTRA_NOVEL_LINK, novelLink);
-                this.startActivity(intent2);
-                this.finish();
-                return;
-            }
-        } else {
-            novelLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
-        }
-        Log.v("Registrerd novelLink-: ", novelLink);
-        progress = (ProgressBar) findViewById(R.id.progress_bar_novel);
-
-
-
-        mdisp = getWindowManager().getDefaultDisplay(); // Display
-        mdispSize = new Point(); // Point
-        mdisp.getSize(mdispSize);
-        maxY = mdispSize.y; // Max y coordinate => bottom of display
-
-        touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
-
-
-        new ParseReadingPage().execute(novelLink);
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mVisible = true;
-        toggle();
-    }
-
-    // novelItems = (header, prevLink, nextLink, String novelText)
-    public void setNovelText(final List<String> novelInfo) {
-
         scrollView = (ScrollView) findViewById(R.id.fullscreen_content);
         novelTextView = (TextView) findViewById(R.id.main_text_view);
         novelHeader = (TextView) findViewById(R.id.novel_name_header_novel);
@@ -198,19 +149,57 @@ public class ReadingActivity extends AppCompatActivity {
         nextTextView = (TextView) findViewById(R.id.next_link_text_view);
         prevBottomTextView = (TextView) findViewById(R.id.prev_link_text_view_bottom);
         nextBottomTextView = (TextView) findViewById(R.id.next_link_text_view_bottom);
+        progress = (ProgressBar) findViewById(R.id.progress_bar_novel);
+
+        // Data for navigation on screen
+        mdisp = getWindowManager().getDefaultDisplay(); // Display
+        mdispSize = new Point(); // Point
+        mdisp.getSize(mdispSize);
+        maxY = mdispSize.y; // Max y coordinate => bottom of display
+        touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+
+        // Received intent ------------------------------------------------------------------------
+        Intent intent = getIntent();
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) { // implicit intent
+            Uri data = intent.getData();
+            novelLink = data.toString();
+            if (novelLink.endsWith("-index/")) { // dirty hack in case intent is to chapter page
+                Intent intentChapter = new Intent(this, ChapterActivity.class);
+                intentChapter.putExtra(EXTRA_NOVEL_LINK, novelLink);
+                this.startActivity(intentChapter);
+                this.finish(); // close this activity
+                return; // return so the activity does not run in background
+            }
+        } else {
+            novelLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
+        }
+
+
+        // Parse link from intent
+        new ParseReadingPage().execute(novelLink);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mVisible = true;
+        toggle(); // immersive mode
+    }
+
+    // novelItems = (header, prevLink, nextLink, String novelText)
+    public void setNovelText(final List<String> novelInfo) {
 
         scrollView.setVerticalScrollBarEnabled(false);
         prevTextView.setPaintFlags(prevTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG); // underline under text
         nextTextView.setPaintFlags(nextTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         prevBottomTextView.setPaintFlags(prevBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         nextBottomTextView.setPaintFlags(nextBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
-        novelTextView.setText(novelInfo.get(3));
-        novelHeader.setText(novelInfo.get(0));
-        prevTextView.setText(getString(R.string.previous));
+        novelTextView.setText(novelInfo.get(3)); // main text
+        novelHeader.setText(novelInfo.get(0)); // novel name
+        prevTextView.setText(getString(R.string.previous)); // Setting text here so it looks cleaner when opening for frist time
         nextTextView.setText(getString(R.string.next));
         prevBottomTextView.setText(getString(R.string.previous));
         nextBottomTextView.setText(getString(R.string.next));
-
 
         Log.v("maxy: ", "" + maxY);
 
@@ -238,7 +227,7 @@ public class ReadingActivity extends AppCompatActivity {
 
                     if (touchMove <= touchSlop) { // touchSlop is computed by the system, and tells
                         if ((touchLocationY > 30 && touchLocationY < 70) && (touchLocationX > 30 &&
-                            touchLocationX < 70)) { // middle of screen 30 - 70% both x, y
+                                touchLocationX < 70)) { // middle of screen 30 - 70% both x, y
                             toggle(); // toggle immersive mode
                             scrollView.setVerticalScrollBarEnabled(true);
                         }
@@ -253,6 +242,7 @@ public class ReadingActivity extends AppCompatActivity {
             }
         });
 
+        // novelInfo: { novelName, nextLink, prevLink, mainText }
         prevTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -289,6 +279,12 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     public class ParseReadingPage extends AsyncTask<String, Void, List<String>> {
+        List<String> novelInfo = new ArrayList<>();
+        String htmlParse = "";
+        String prevLink = "";
+        String nextLink = "";
+        String novelHeader = "";
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -297,11 +293,6 @@ public class ReadingActivity extends AppCompatActivity {
 
         @Override
         protected List<String> doInBackground(String... linkList) {
-            List<String> novelInfo = new ArrayList<String>();
-            String htmlParse = "";
-            String prevLink = "";
-            String nextLink = "";
-            String novelHeader = "";
             try {
                 Document doc = Jsoup.connect(linkList[0]).get();
                 novelHeader = doc.select("h1[class=entry-title]").text();
@@ -328,7 +319,7 @@ public class ReadingActivity extends AppCompatActivity {
                 novelInfo.add(nextLink);
                 novelInfo.add(htmlParse);
 
-            } catch (Exception e) { Log.e("main", ""+e);}
+            } catch (IOException IOE) { Log.e("ReadingActivity -IOE-", "" + IOE);}
             return novelInfo;
         }
 

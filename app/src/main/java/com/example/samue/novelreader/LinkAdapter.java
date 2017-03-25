@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.os.Build.ID;
 import static com.example.samue.novelreader.MainActivity.APPLICATION_ID;
@@ -28,7 +29,7 @@ import static com.example.samue.novelreader.MainActivity.APPLICATION_ID;
 public class LinkAdapter extends ArrayAdapter<Novel> {
 
 
-    public LinkAdapter(Context context, ArrayList<Novel> novelItems) {
+    public LinkAdapter(Context context, List<Novel> novelItems) {
         super(context, 0, novelItems);
     }
 

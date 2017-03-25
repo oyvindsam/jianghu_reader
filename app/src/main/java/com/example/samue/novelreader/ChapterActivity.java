@@ -9,19 +9,17 @@ import android.view.View;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
-import static com.example.samue.novelreader.MainActivity.APPLICATION_ID;
-import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_NAME;
+
 import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_LINK;
-import static com.example.samue.novelreader.MainActivity.FROM_MAIN;
-import static com.example.samue.novelreader.MainActivity.FROM_READING;
 
 public class ChapterActivity extends AppCompatActivity {
 
@@ -29,6 +27,7 @@ public class ChapterActivity extends AppCompatActivity {
     private GridView novelChaptersTextView;
     private TextView novelHeader;
     private ProgressBar progress;
+    private ChapterAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,26 +43,26 @@ public class ChapterActivity extends AppCompatActivity {
         Intent intent = getIntent();
         chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK);
 
-        new ParseNovelChapters().execute();
+        new ParseNovelChapters().execute(chapterLink);
     }
 
-    public void setChapterLinks(ArrayList<Chapter> chapterLinks) {
-        ChapterAdapter adapter = new ChapterAdapter(this, chapterLinks);
+    public void setChapterLinks(List<Chapter> chapterLinks) {
+        adapter = new ChapterAdapter(this, chapterLinks);
         novelChaptersTextView.setAdapter(adapter);
         progress.setVisibility(View.INVISIBLE);
     }
 
-    class ParseNovelChapters extends AsyncTask<Void, Void, Void> {
-        ArrayList<Chapter> tempChapterNames = new ArrayList<>();
+    class ParseNovelChapters extends AsyncTask<String, Void, List<Chapter>> {
+        List<Chapter> tempChapterNames = new ArrayList<>();
         String novelName = "";
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected List<Chapter> doInBackground(String... chapterLinks) {
             try {
-                Document doc = Jsoup.connect(chapterLink).get();
+                Document doc = Jsoup.connect(chapterLinks[0]).get();
                 novelName = doc.select("h1[class=entry-title]").text();
                 if (novelName.contains("(")) { // chinese name inside brackets ()
-                    String[] nameSplit = novelName.split("[(]"); // nameSlipt = { "english", "chinese"}
+                    String[] nameSplit = novelName.split("[(]"); // nameSplit = { "english", "chinese"}
                     novelName = nameSplit[0].trim();
                 }
                 if (novelName.contains("–")) {
@@ -73,19 +72,19 @@ public class ChapterActivity extends AppCompatActivity {
                 Elements elements = doc.select("div[itemprop=articleBody]"); // area where links are
                 Elements links = elements.select("a[href]"); // all links
                 for (Element link : links) {
-                    if (link.text().contains("Chapter")) {
+                    if (link.text().contains("Chapter")) { // if link text contains chapter --> add
                         tempChapterNames.add(new Chapter(link.id(), link.text(), link.attr("href")));
                     }
                 }
-            } catch (Exception e) { Log.e("main", ""+e);}
-            return null;
+            } catch (IOException IOE) { Log.e("ChapterActivity -IOE-", "" + IOE);}
+            return tempChapterNames;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(List<Chapter> chapterNames) {
             super.onPreExecute();
             novelHeader.setText(novelName);
-            setChapterLinks(tempChapterNames);
+            setChapterLinks(chapterNames);
         }
 
     }

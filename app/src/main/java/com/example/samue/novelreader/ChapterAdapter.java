@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_LINK;
 import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_NAME;
@@ -22,7 +23,7 @@ import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_NAME;
 public class ChapterAdapter extends ArrayAdapter<Chapter> {
 
 
-    public ChapterAdapter(Context context, ArrayList<Chapter> chapterItems) {
+    public ChapterAdapter(Context context, List<Chapter> chapterItems) {
         super(context, 0, chapterItems);
     }
 
