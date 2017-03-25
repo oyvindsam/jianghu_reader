@@ -257,7 +257,7 @@ public class ReadingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 novelLink = novelInfo.get(1);
-                new ParseReadingPage().execute();
+                new ParseReadingPage().execute(novelLink);
             }
         });
 
@@ -265,7 +265,7 @@ public class ReadingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 novelLink = novelInfo.get(2);
-                new ParseReadingPage().execute();
+                new ParseReadingPage().execute(novelLink);
             }
         });
 
@@ -273,7 +273,7 @@ public class ReadingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 novelLink = novelInfo.get(1);
-                new ParseReadingPage().execute();
+                new ParseReadingPage().execute(novelLink);
             }
         });
 
@@ -281,7 +281,7 @@ public class ReadingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 novelLink = novelInfo.get(2);
-                new ParseReadingPage().execute();
+                new ParseReadingPage().execute(novelLink);
             }
         });
         scrollView.fullScroll(ScrollView.FOCUS_UP);
