@@ -44,10 +44,7 @@ public class LinkAdapter extends ArrayAdapter<Novel> {
         final Novel currentNovel = getItem(position);
 
         TextView novelName = (TextView) listItemView.findViewById(R.id.novel_name);
-        //novelName.setTextColor(Color.WHITE);
         novelName.setText(currentNovel.getNovelName());
-
-
 
         listItemView.setOnClickListener(new View.OnClickListener() {
             @Override

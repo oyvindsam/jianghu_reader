@@ -2,7 +2,7 @@
     <string name="app_name">Jianghu Reader</string>
     <string name="previous">Prev</string>
     <string name="next">Next</string>
-   <string name="title_activity_reading">Reading</string>
+    <string name="title_activity_reading">Reading</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
@@ -12,9 +12,13 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
 
     <string name="title_activity_test">test</string>
+
+    <string name="action_reverse_chapter_order">Reverse</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="action_reload">Reload</string>
 
     <string name="lorem_ipsum">                                                                     Book 24, The Starlord of Fogstone, Chapter 1 – Leaving the Three Realms
                                                                      \n\n

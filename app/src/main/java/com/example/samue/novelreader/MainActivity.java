@@ -1,85 +1,102 @@
 package com.example.samue.novelreader;
 
-import android.os.AsyncTask;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.ProgressBar;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import java.io.IOException;
+
+import com.example.samue.novelreader.data.LastNovelDbHelper;
+import com.example.samue.novelreader.data.NovelContract.LastRead;
+
 import java.util.ArrayList;
+import java.util.List;
+
+import static android.os.Build.VERSION_CODES.N;
 
 public class MainActivity extends AppCompatActivity {
 
     public static String APPLICATION_ID = "com.example.samue.novelreader";
-    public static String FROM_MAIN = "com.example.samue.novelreader.MainActivity";
-    public static String FROM_READING = "com.example.samue.novelreader.ReadingActivity";
     public static String EXTRA_NOVEL_NAME = "com.example.samue.novelreader.NOVEL_NAME";
     public static String EXTRA_NOVEL_LINK = "com.example.samue.novelreader.NOVEL_LINK";
-    private static String WUXIAWORLD = "http://www.wuxiaworld.com/";
+    public static final String WUXIAWORLD = "http://www.wuxiaworld.com/";
+    public static WebParse WEBPARSE = new WebParse();
 
     GridView novelLinksTextView;
     LinkAdapter adapter;
     ProgressBar progress;
+    List<Novel> novelNameList;
+    public LastNovelDbHelper mLastNovelDbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.frame_main);
 
-        progress = (ProgressBar) findViewById(R.id.progress_bar_main);
+        NovelsFragment novelsFragment = new NovelsFragment();
 
-        novelLinksTextView = (GridView) findViewById(R.id.novel_list);
-        new ParseNovelsPage().execute(WUXIAWORLD);
-    }
-
-    public void setNovelLinks(ArrayList<Novel> novelLinks) {
-        adapter = new LinkAdapter(this, novelLinks);
-        novelLinksTextView.setAdapter(adapter);
-        progress.setVisibility(View.INVISIBLE);
-    }
-
-
-    public class ParseNovelsPage extends AsyncTask<String, Void, ArrayList<Novel>> {
-        ArrayList<Novel> tempNovelNames = new ArrayList<>();
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progress.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected ArrayList<Novel> doInBackground(String... linkList) {
-            try {
-                Document doc = Jsoup.connect(linkList[0]).get();
-                Elements elements = doc.select("li[id=menu-item-2165]"); // select menu item
-                Elements links = elements.select("a[href]"); // get all links i an array
-                links.remove(0); // first link redundant
-                for (Element link : links) {
-                    if (link.text().contains("(")) { // chinese name inside brackets ()
-                        String[] nameSplit = link.text().split("[(]"); // nameSlipt = { "english", "chinese"}
-                        tempNovelNames.add(new Novel(nameSplit[0].trim(), link.attr("href"))); // english name, link
-                    } else { // if it does not have a chinese name in header
-                        tempNovelNames.add(new Novel(link.text(), link.attr("href")));
-                    }
-                }
-            } catch (IOException IOE) {
-                Log.e("MainActivity -IOE- ", "" + IOE);
+        if (findViewById(R.id.fragment_container) != null) {
+            if(savedInstanceState != null) {
+                return;
             }
-            return tempNovelNames;
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, novelsFragment).commit();
         }
 
-        @Override
-        protected void onPostExecute(ArrayList<Novel> novelNames) {
-            super.onPreExecute();
-            setNovelLinks(novelNames);
-        }
+        mLastNovelDbHelper = new LastNovelDbHelper(this);
     }
+
+    private void displayDatabaseInfo() {
+        SQLiteDatabase db = mLastNovelDbHelper.getReadableDatabase();
+
+        String[] projection = {
+                LastRead._ID,
+                LastRead.COLUMN_NOVEL_NAME,
+                LastRead.COLUMN_NOVEL_LINK };
+
+        Cursor cursor = db.query(
+                LastRead.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null);
+
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu options from the res/menu/menu_catalog.xml file.
+        // This adds menu items to the app bar.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // User clicked on a menu option in the app bar overflow menu
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
+                return true;
+
+            case R.id.action_reload:
+                adapter.clear();
+                WEBPARSE.parseNovelLinks(WUXIAWORLD, this, progress);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 
 }

@@ -21,19 +21,22 @@
         <activity android:name=".ReadingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="http"/>
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
                 <data android:scheme="https" />
-                <data android:host="wuxiaworld.com"/>
-                <data android:host="www.wuxiaworld.com"/>
-                <data android:host="m.wuxiaworld.com"/>
+                <data android:host="wuxiaworld.com" />
+                <data android:host="www.wuxiaworld.com" />
+                <data android:host="m.wuxiaworld.com" />
             </intent-filter>
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_reading"
             android:theme="@style/FullscreenTheme" />
         </activity>
         <activity android:name=".ChapterActivity" />
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

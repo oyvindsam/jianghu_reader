@@ -6,8 +6,9 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <!-- Remove actionbar
         <item name="windowNoTitle">true</item>
-        <item name="windowActionBar">false</item>
+        <item name="windowActionBar">false</item> -->
     </style>
 
     <style name="FullscreenTheme" parent="AppTheme">
@@ -55,6 +56,10 @@
         <item name="android:scrollbarSize">3dp</item>
         <item name="android:scrollbarTrackVertical">@android:color/transparent</item>
         <item name="android:scrollbarThumbVertical">@color/colorDarkGray</item>
+    </style>
+
+    <style name="CircularProgress" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
 </resources>

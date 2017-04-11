@@ -8,17 +8,15 @@
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
-
     <ProgressBar
-        android:elevation="1dp"
-        android:id="@+id/progress_bar_novel"
-        android:layout_width="match_parent"
+        android:id="@+id/loading_spinner_reading"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyleLarge"
-        android:progressDrawable="@drawable/circular_progress_bar"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="32dp"
-        android:layout_centerHorizontal="true" />
+        android:layout_marginTop="8dp"
+        android:layout_centerHorizontal="true"
+        android:elevation="1dp"
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:theme="@style/CircularProgress" />
 
     <ScrollView
         android:id="@+id/fullscreen_content"

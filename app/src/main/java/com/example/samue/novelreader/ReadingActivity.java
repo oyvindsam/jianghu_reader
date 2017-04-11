@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,27 +17,25 @@ import android.view.ViewConfiguration;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.samue.novelreader.MainActivity.EXTRA_NOVEL_LINK;
+import static com.example.samue.novelreader.MainActivity.WEBPARSE;
+
 
 public class ReadingActivity extends AppCompatActivity {
 
     private static double MAX_SCREEN_Y_COORDINATE = 2559.0;
     private static double MAX_SCREEN_X_COORDINATE = 1418.0;
 
-    String novelLink;
+    String chapterLink;
     ScrollView scrollView;
     TextView novelTextView, novelHeader, prevTextView, nextTextView, prevBottomTextView,
             nextBottomTextView;
     ProgressBar progress;
+    List<String> novelInfo;
 
     Display mdisp;
     Point mdispSize;
@@ -149,7 +146,13 @@ public class ReadingActivity extends AppCompatActivity {
         nextTextView = (TextView) findViewById(R.id.next_link_text_view);
         prevBottomTextView = (TextView) findViewById(R.id.prev_link_text_view_bottom);
         nextBottomTextView = (TextView) findViewById(R.id.next_link_text_view_bottom);
-        progress = (ProgressBar) findViewById(R.id.progress_bar_novel);
+        progress = (ProgressBar) findViewById(R.id.loading_spinner_reading);
+
+        scrollView.setVerticalScrollBarEnabled(false);
+        prevTextView.setPaintFlags(prevTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG); // underline under text
+        nextTextView.setPaintFlags(nextTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+        prevBottomTextView.setPaintFlags(prevBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+        nextBottomTextView.setPaintFlags(nextBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
 
         // Data for navigation on screen
         mdisp = getWindowManager().getDefaultDisplay(); // Display
@@ -162,21 +165,20 @@ public class ReadingActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (Intent.ACTION_VIEW.equals(intent.getAction())) { // implicit intent
             Uri data = intent.getData();
-            novelLink = data.toString();
-            if (novelLink.endsWith("-index/")) { // dirty hack in case intent is to chapter page
+            chapterLink = data.toString();
+            if (chapterLink.endsWith("-index/")) { // dirty hack in case intent is to chapter page
                 Intent intentChapter = new Intent(this, ChapterActivity.class);
-                intentChapter.putExtra(EXTRA_NOVEL_LINK, novelLink);
+                intentChapter.putExtra(EXTRA_NOVEL_LINK, chapterLink);
                 this.startActivity(intentChapter);
                 this.finish(); // close this activity
                 return; // return so the activity does not run in background
             }
         } else {
-            novelLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
+            chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
         }
 
-
-        // Parse link from intent
-        new ParseReadingPage().execute(novelLink);
+        novelInfo = new ArrayList<>();
+        WEBPARSE.parseChapterText(chapterLink, this, progress);
     }
 
     @Override
@@ -187,13 +189,10 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     // novelItems = (header, prevLink, nextLink, String novelText)
-    public void setNovelText(final List<String> novelInfo) {
+    public void setNovelText(List<String> newNovelInfo) {
+        novelInfo.clear();
+        novelInfo.addAll(newNovelInfo);
 
-        scrollView.setVerticalScrollBarEnabled(false);
-        prevTextView.setPaintFlags(prevTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG); // underline under text
-        nextTextView.setPaintFlags(nextTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
-        prevBottomTextView.setPaintFlags(prevBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
-        nextBottomTextView.setPaintFlags(nextBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         novelTextView.setText(novelInfo.get(3)); // main text
         novelHeader.setText(novelInfo.get(0)); // novel name
         prevTextView.setText(getString(R.string.previous)); // Setting text here so it looks cleaner when opening for frist time
@@ -231,7 +230,7 @@ public class ReadingActivity extends AppCompatActivity {
                             toggle(); // toggle immersive mode
                             scrollView.setVerticalScrollBarEnabled(true);
                         }
-                        else if (touchLocationY < 50) { // Upper part of screen 0 - 40%
+                        else if (touchLocationY < 30) { // Upper part of screen 0 - 40%
                             scrollView.scrollBy(0, -(maxY - 20)); // scroll up
                         } else { // lower part of screen 70% +
                             scrollView.scrollBy(0, +(maxY - 20)); // scroll down
@@ -246,88 +245,42 @@ public class ReadingActivity extends AppCompatActivity {
         prevTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                novelLink = novelInfo.get(1);
-                new ParseReadingPage().execute(novelLink);
+                chapterLink = novelInfo.get(1);
+                WEBPARSE.parseChapterText(chapterLink, (ReadingActivity) v.getContext(), progress);
             }
         });
 
         nextTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                novelLink = novelInfo.get(2);
-                new ParseReadingPage().execute(novelLink);
+                chapterLink = novelInfo.get(2);
+                WEBPARSE.parseChapterText(chapterLink, (ReadingActivity) v.getContext(), progress);
             }
         });
 
         prevBottomTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                novelLink = novelInfo.get(1);
-                new ParseReadingPage().execute(novelLink);
+                chapterLink = novelInfo.get(1);
+                WEBPARSE.parseChapterText(chapterLink, (ReadingActivity) v.getContext(), progress);
             }
         });
 
         nextBottomTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                novelLink = novelInfo.get(2);
-                new ParseReadingPage().execute(novelLink);
+                chapterLink = novelInfo.get(2);
+                WEBPARSE.parseChapterText(chapterLink, (ReadingActivity) v.getContext(), progress);
             }
         });
-        scrollView.fullScroll(ScrollView.FOCUS_UP);
+
         progress.setVisibility(View.INVISIBLE);
-    }
-
-    public class ParseReadingPage extends AsyncTask<String, Void, List<String>> {
-        List<String> novelInfo = new ArrayList<>();
-        String htmlParse = "";
-        String prevLink = "";
-        String nextLink = "";
-        String novelHeader = "";
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progress.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected List<String> doInBackground(String... linkList) {
-            try {
-                Document doc = Jsoup.connect(linkList[0]).get();
-                novelHeader = doc.select("h1[class=entry-title]").text();
-                Elements elements = doc.select("div[itemprop=articleBody]");
-                Elements links = doc.select("a[href]");
-                Elements paragraphElements = elements.select("p");
-                // Add cancel method and mor try catch.
-                for (Element link : links) {
-                    if (link.text().equals("Previous Chapter") && prevLink.length() < 1) {
-                        prevLink += link.attr("href");
-                    }
-                    else if (link.text().equals("Next Chapter") && nextLink.length() < 1) {
-                        nextLink += link.attr("href");
-                    }
-                }
-                for (Element p : paragraphElements) {
-                    if (!p.text().contains("Previous Chapter") && !p.text().contains("Next Chapter")) {
-                        Log.v("Text: ", p.text());
-                        htmlParse += p.text().trim() + "\n\n";
-                    }
-                }
-                novelInfo.add(novelHeader);
-                novelInfo.add(prevLink);
-                novelInfo.add(nextLink);
-                novelInfo.add(htmlParse);
-
-            } catch (IOException IOE) { Log.e("ReadingActivity -IOE-", "" + IOE);}
-            return novelInfo;
-        }
-
-        @Override
-        protected void onPostExecute(List<String> result) {
-            super.onPreExecute();
-            setNovelText(result);
-        }
+        scrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.fullScroll(ScrollView.FOCUS_UP);
+            }
+        });
     }
 
     @Override
