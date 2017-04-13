@@ -4,12 +4,11 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "com.example.samue.novelreader"
+        applicationId "com.example.samue.jianghureader"
         minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -29,5 +28,5 @@ dependencies {
     compile 'org.jsoup:jsoup:1.10.2'
     compile 'com.android.support:support-v4:25.2.0'
     compile 'com.android.support:design:25.2.0'
-    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:cardview-v7:21.0.+'
 }

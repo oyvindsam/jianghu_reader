@@ -18,5 +18,10 @@
     <item
         android:id="@+id/action_reverse_chapter_order"
         android:title="@string/action_reverse_chapter_order"
+        android:icon="@drawable/ic_sort_white_24dp"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_clear_last_chapter"
+        android:title="@string/action_clear_db" />
 </menu>
