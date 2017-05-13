@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.example.samue.jianghureader.data.LastNovelDbHelper;
 import com.example.samue.jianghureader.data.NovelContract.NovelKeys;
+import com.example.samue.jianghureader.data.WebParse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +30,15 @@ import java.util.List;
 import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_LINK;
 import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_NAME;
 import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
+import static java.security.AccessController.getContext;
 
 
 public class ReadingActivity extends AppCompatActivity {
 
     private static final int NOVEL_LINK_PREV = 1;
     private static final int NOVEL_LINK_NEXT = 2;
+    private static final int NOVEL_LINK_CURRENT = 4;
+    private static final int CURSOR_NOVEL_LINK = 1;
     private static final double MAX_SCREEN_Y_COORDINATE = 2559.0;
     private static final double MAX_SCREEN_X_COORDINATE = 1418.0;
 
@@ -204,6 +208,8 @@ public class ReadingActivity extends AppCompatActivity {
             }
         });
 
+        novelInfoList = new ArrayList<>();
+
         // Received intent ------------------------------------------------------------------------
         Intent intent = getIntent();
         if (Intent.ACTION_VIEW.equals(intent.getAction())) { // implicit intent
@@ -215,12 +221,17 @@ public class ReadingActivity extends AppCompatActivity {
                 this.startActivity(intentChapter);
                 this.finish(); // close this activity
                 return; // return so the activity does not run in background
+            } else {
+                WEBPARSE.findNovelName(chapterLink, this);
+                progress.setVisibility(View.VISIBLE);
+                return;
             }
-        } else {
-            chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
-            novelName = intent.getStringExtra(EXTRA_NOVEL_NAME);
-            Log.v("Name, link: ", novelName + ", " + chapterLink);
         }
+
+        chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
+        novelName = intent.getStringExtra(EXTRA_NOVEL_NAME);
+        Log.v("Name, link: ", novelName + ", " + chapterLink);
+
 
         if (mLastNovelDb.getLastChapter(mLastNovelDb.getReadableDatabase(), novelName).size() == 0) {
             Log.v("Lastchapter = 0", "-added first entry to table-");
@@ -233,9 +244,11 @@ public class ReadingActivity extends AppCompatActivity {
             database.close();
         }
 
-        novelInfoList = new ArrayList<>();
+        //novelInfoList = new ArrayList<>();
         WEBPARSE.parseChapterText(chapterLink, this, progress);
     }
+
+
 
     @Override
     protected void onResume() {
@@ -244,10 +257,14 @@ public class ReadingActivity extends AppCompatActivity {
         toggle(); // immersive mode
     }
 
+    public void updateNovelName(String newNovelName) {
+        novelName = newNovelName;
+        WEBPARSE.parseChapterText(chapterLink, this, progress);
+    }
 
     // novelItems = (header, prevLink, nextLink, String novelText)
     public void setNovelText(List<String> newNovelInfo) {
-        chapterLink = novelInfoList.get(NOVEL_LINK_NEXT); // so "last" novel visited
+        chapterLink = newNovelInfo.get(NOVEL_LINK_CURRENT); // so "last" novel visited
         novelInfoList.clear();
         novelInfoList.addAll(newNovelInfo);
 

@@ -54,8 +54,8 @@ public class NovelsFragment extends Fragment {
     View rootView;
     LastNovelDbHelper mLastNovelDb;
     FavoriteNovelDbHelper mFavoriteNovelDb;
-    MainActivity context;
     private Button btnWW, btnTN, btnYx;
+    MainActivity context;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,9 +70,8 @@ public class NovelsFragment extends Fragment {
             Log.v("InstaReturn", "rootview");
             return rootView;
         }
-
+        context = (MainActivity) getContext();
         rootView = inflater.inflate(R.layout.activity_main, container, false);
-        final Context context = rootView.getContext();
 
         mLastNovelDb = new LastNovelDbHelper(rootView.getContext());
         mFavoriteNovelDb = new FavoriteNovelDbHelper((rootView.getContext()));

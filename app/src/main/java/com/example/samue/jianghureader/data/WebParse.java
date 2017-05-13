@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.name;
+
 /**
  * Created by samue on 10.04.2017.
  */
@@ -129,7 +131,7 @@ public class WebParse {
         }
 
     }
- // ------------ReadingActivity-----------------------------------------------------
+    // ------------ReadingActivity-----------------------------------------------------
 
     public void parseChapterText(String chapterLink, ReadingActivity context, ProgressBar progress) {
         progress.setVisibility(View.VISIBLE);
@@ -178,6 +180,7 @@ public class WebParse {
                 novelInfo.add(prevLink);
                 novelInfo.add(nextLink);
                 novelInfo.add(htmlParse);
+                novelInfo.add(chapterLink);
 
             } catch (IOException IOE) { Log.e("ReadingActivity -IOE-", "" + IOE);}
             return novelInfo;
@@ -187,6 +190,61 @@ public class WebParse {
         protected void onPostExecute(List<String> result) {
             super.onPreExecute();
             context.setNovelText(result);
+        }
+    }
+
+
+    // ---------------Implicit intent find chapter name------------
+
+    public void findNovelName(String chapterLink, Context context) {
+        new FindNovelName().execute(chapterLink, context);
+    }
+
+    private class FindNovelName extends AsyncTask<Object, Void, String> {
+        String chapterLink, novelName;
+        ReadingActivity context;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(Object... params) {
+            chapterLink = (String) params[0];
+            context = (ReadingActivity) params[1];
+            try {
+                Document doc = Jsoup.connect(chapterLink).get();
+                String[] tempArray = chapterLink.split("/");
+                String baseLink = "";
+                for (int i = 0; i < tempArray.length - 1; i++) {
+                    baseLink += tempArray[i] + "/";
+                }
+                Log.v("baseLink: ", baseLink);
+                Elements elements = doc.select("li[id=menu-item-2165]"); // select menu item
+                Elements links = elements.select("a[href]"); // get all links i an array
+                links.remove(0); // first link redundant
+                for (Element link : links) {
+                    Log.v("LINK: ", "" + link.attr("href"));
+                    if (baseLink.equals(link.attr("href"))) {
+                        if (link.text().contains("(")) { // chinese name inside brackets ()
+                            String[] nameSplit = link.text().split("[(]"); // nameSlipt = { "english", "chinese"}
+                            novelName = nameSplit[0].trim(); // english name
+                        } else { // if it does not have a chinese name in header
+                            novelName = link.text();
+                        }
+                    }
+                }
+            } catch (IOException IOE) {
+                Log.e("MainActivity -IOE- ", "" + IOE);
+            }
+            return novelName;
+        }
+
+        @Override
+        protected void onPostExecute(String novelName) {
+            super.onPreExecute();
+            context.updateNovelName(novelName);
         }
     }
 }
