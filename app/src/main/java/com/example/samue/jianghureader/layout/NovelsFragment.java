@@ -1,41 +1,42 @@
 package com.example.samue.jianghureader.layout;
 
+import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.samue.jianghureader.ChapterActivity;
-import com.example.samue.jianghureader.LinkAdapter;
 import com.example.samue.jianghureader.MainActivity;
-import com.example.samue.jianghureader.Novel;
+import com.example.samue.jianghureader.data.WebParsingInterface;
+import com.example.samue.jianghureader.model.Novel;
+import com.example.samue.jianghureader.data.NovelCursorAdapter;
 import com.example.samue.jianghureader.R;
-import com.example.samue.jianghureader.data.FavoriteNovelDbHelper;
-import com.example.samue.jianghureader.data.LastNovelDbHelper;
-import com.example.samue.jianghureader.data.NovelComparator;
-import com.example.samue.jianghureader.data.NovelContract.NovelKeys;
+import com.example.samue.jianghureader.data.NovelContract;
+import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static android.util.Log.v;
-import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_LINK;
-import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_NAME;
 import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
 import static com.example.samue.jianghureader.MainActivity.WUXIAWORLD;
 
@@ -43,19 +44,23 @@ import static com.example.samue.jianghureader.MainActivity.WUXIAWORLD;
  * Created by samue on 11.04.2017.
  */
 
-public class NovelsFragment extends Fragment {
+// hoved novelle siden, fragment nr 2
+public class NovelsFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>, WebParsingInterface<Novel> {
 
-    public NovelsFragment() {}
+    private static final String LOG_ID = NovelsFragment.class.getSimpleName();
 
-    ListView novelLinksTextView;
-    LinkAdapter linkAdapter;
-    ProgressBar progress;
-    List<Novel> novelList;
+    ListView novelList;
     View rootView;
-    LastNovelDbHelper mLastNovelDb;
-    FavoriteNovelDbHelper mFavoriteNovelDb;
+    ImageView imgBtnAdd;
+    private NovelCursorAdapter mCursorAdapter;
+    private static int LOADER_ID = 1;
+
     private Button btnWW, btnTN, btnYx;
     MainActivity context;
+    ProgressBar progress;
+
+    public NovelsFragment() {}
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,116 +76,144 @@ public class NovelsFragment extends Fragment {
             return rootView;
         }
         context = (MainActivity) getContext();
-        rootView = inflater.inflate(R.layout.activity_main, container, false);
+        rootView = inflater.inflate(R.layout.frag_novels, container, false);
 
-        mLastNovelDb = new LastNovelDbHelper(rootView.getContext());
-        mFavoriteNovelDb = new FavoriteNovelDbHelper((rootView.getContext()));
+        context.getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        mCursorAdapter = new NovelCursorAdapter(getContext(), null);
 
-        progress = (ProgressBar) rootView.findViewById(R.id.loading_spinner_main);
-        novelLinksTextView = (ListView) rootView.findViewById(R.id.novel_list);
-        novelList = new ArrayList<>();
-        linkAdapter = new LinkAdapter(rootView.getContext(), novelList, this);
+        novelList = (ListView) rootView.findViewById(R.id.novel_list);
+        imgBtnAdd = (ImageView) rootView.findViewById(R.id.btn_add_novel);
 
-        novelLinksTextView.setAdapter(linkAdapter);
+        progress = (ProgressBar) rootView.findViewById(R.id.loading_spinner_novels);
+        progress.setVisibility(View.GONE);
 
-        novelLinksTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        novelList.setAdapter(mCursorAdapter);
+
+        novelList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String novelName = novelList.get(position).getNovelName();
-                String novelLink = novelList.get(position).getNovelLink();
-
                 Intent intent = new Intent(getContext(), ChapterActivity.class);
-                intent.putExtra(EXTRA_NOVEL_NAME, novelName);
-                intent.putExtra(EXTRA_NOVEL_LINK, novelLink);
+                Uri uri = ContentUris.withAppendedId(NovelEntry.CONTENT_URI, id);
+                intent.setData(uri);
+                Log.v(LOG_ID, uri.toString());
                 startActivity(intent);
             }
         });
+
 
         btnWW = (Button) rootView.findViewById(R.id.btn_wuxiaworld);
         btnWW.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getContext(), "Updating", Toast.LENGTH_SHORT).show();
-                reloadNovelLinks();
             }
         });
 
-        WEBPARSE.parseNovelLinks(WUXIAWORLD, rootView.getContext(), progress);
+        Cursor cursor = getActivity().getContentResolver().query(
+                NovelEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.getCount() < 1) { // null elements in database, start loading
+            WEBPARSE.parseNovelLinks(WUXIAWORLD, this);
+        }
 
         return rootView;
-    }
-
-    public void removeNovel(int position) {
-
-        String novelName = novelList.get(position).getNovelName();
-        String novelLink = novelList.get(position).getNovelLink();
-
-        ContentValues values = new ContentValues();
-        values.put(NovelKeys.COLUMN_NOVEL_NAME, novelName);
-        values.put(NovelKeys.COLUMN_NOVEL_LINK, novelLink);
-
-        SQLiteDatabase database = mFavoriteNovelDb.getWritableDatabase();
-
-        long idDb = database.insert(NovelKeys.TABLE_NAME, null, values);
-        database.close();
-        // If the ID is -1, then the insertion failed. Log an error and return null.
-        if (idDb == -1) {
-            Log.e("NovelsFragment", "Failed to insert row for " + novelName);
-            return;
-        }
-        Toast.makeText(rootView.getContext(), "Novel added.", Toast.LENGTH_SHORT).show();
-        linkAdapter.remove(novelList.get(position));
-        novelList.remove(position);
-        context.updateFavoriteFragment();
-    }
-
-    public void addNovel(Novel novel) {
-        if (!novelList.contains(novel)) {
-            Log.v("Adding novel", novel.getNovelName());
-            novelList.add(novel);
-            Collections.sort(novelList, new NovelComparator());
-            linkAdapter.clear();
-            linkAdapter.addAll(novelList);
-        }
-    }
-
-    public Fragment getNovelFragment() {
-        return this;
-    }
-
-
-    public void setNovelLinks(List<Novel> novelLinks) {
-        progress.setVisibility(View.INVISIBLE);
-        novelList = new ArrayList<>(returnDiff(novelLinks, mFavoriteNovelDb.getFavorites(mFavoriteNovelDb.getReadableDatabase())));
-        mFavoriteNovelDb.close();
-        Collections.sort(novelList, new NovelComparator());
-        linkAdapter.clear();
-        linkAdapter.addAll(novelList);
-    }
-
-    private List<Novel> returnDiff(List<Novel> all, List<Novel> favorites) {
-        List<Novel> newList = new ArrayList<>(all);
-        for (Novel n1 : all) {
-            for (Novel n2 : favorites) {
-                if (n1.getNovelName().equals(n2.getNovelName())) {
-                    newList.remove(n1);
-                    Log.v("Removed----: ", n1.getNovelName());
-                    break;
-                }
-            }
-        }
-        Log.v("Diff---!", newList.toString());
-        return newList;
-    }
-
-    public void reloadNovelLinks() {
-        linkAdapter.clear();
-        WEBPARSE.parseNovelLinks(WUXIAWORLD, getContext(), progress);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.findItem(R.id.action_reload).setVisible(false);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // User clicked on a menu option in the app bar overflow menu
+        switch (item.getItemId()) {
+            case R.id.action_settings: /*
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent); */
+                return true;
+            case R.id.action_reset:
+                WEBPARSE.parseNovelLinks(WUXIAWORLD, this);
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {
+                NovelEntry._ID,
+                NovelEntry.COLUMN_NOVEL_NAME,
+                NovelEntry.COLUMN_NOVEL_TOC_LINK,
+                NovelEntry.COLUMN_NOVEL_IS_FAVORITE
+        };
+        String selection = NovelEntry.COLUMN_NOVEL_IS_FAVORITE + "=?";
+        String[] selectionArgs = { "0" };
+
+        return new CursorLoader(getContext(),
+                NovelContract.NovelEntry.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mCursorAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mCursorAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void startLoading() {
+        progress.setVisibility(View.VISIBLE); // add context to webparser
+        context.getContentResolver().delete(
+                NovelEntry.CONTENT_URI,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void finishedLoading(List<Novel> novels) {
+        if (novels == null) { // check if error loading data
+            errorLoading();
+            return;
+        }
+
+        context.getContentResolver().delete(
+                NovelEntry.CONTENT_URI,
+                null,
+                null
+        );
+        ContentValues values = new ContentValues();
+        for (Novel n : novels) {
+            values.put(NovelEntry.COLUMN_NOVEL_NAME, n.getNovelName());
+            values.put(NovelEntry.COLUMN_NOVEL_TOC_LINK, n.getNovelLink());
+
+            context.getContentResolver().insert(
+                    NovelEntry.CONTENT_URI,
+                    values
+            );
+        }
+
+        progress.setVisibility(View.GONE);
+        Toast.makeText(getContext(), "Reset complete", Toast.LENGTH_SHORT).show();
+
+    }
+
+    private void errorLoading() {
+        Toast.makeText(context, "Error loading chapter", Toast.LENGTH_SHORT).show();
     }
 }

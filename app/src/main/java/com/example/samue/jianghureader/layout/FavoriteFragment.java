@@ -1,46 +1,41 @@
 package com.example.samue.jianghureader.layout;
 
+import android.content.ContentUris;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.example.samue.jianghureader.ChapterActivity;
-import com.example.samue.jianghureader.LinkAdapter;
 import com.example.samue.jianghureader.MainActivity;
-import com.example.samue.jianghureader.Novel;
+import com.example.samue.jianghureader.data.NovelCursorAdapter;
 import com.example.samue.jianghureader.R;
-import com.example.samue.jianghureader.data.FavoriteNovelDbHelper;
-import com.example.samue.jianghureader.data.LastNovelDbHelper;
-import com.example.samue.jianghureader.data.NovelComparator;
+import com.example.samue.jianghureader.data.NovelContract;
+import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
+import static com.example.samue.jianghureader.MainActivity.WUXIAWORLD;
 
 
-public class FavoriteFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+public class FavoriteFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int NOVEL_LOADER = 1;
+    private NovelCursorAdapter mCursorAdapter;
+    private static int LOADER_ID = 0;
 
-
-    LastNovelDbHelper mLastNovelDb;
-    FavoriteNovelDbHelper mFavoriteNovelDb;
-    private View rootView;
-    private ListView favoriteListView;
-    LinkAdapter favoriteAdapter;
-    List<Novel> favoriteNovelList;
     MainActivity context;
 
     public FavoriteFragment() {
@@ -51,29 +46,26 @@ public class FavoriteFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        rootView = inflater.inflate(R.layout.fragment_favorite, container, false);
+        View rootView = inflater.inflate(R.layout.frag_favorite_list, container, false);
         context = (MainActivity) getContext();
 
-        mLastNovelDb = new LastNovelDbHelper(getContext());
-        mFavoriteNovelDb = new FavoriteNovelDbHelper(getContext());
-        favoriteNovelList = new ArrayList<>();
+        context.getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 
-        favoriteAdapter = new LinkAdapter(rootView.getContext(), favoriteNovelList, this);
-        favoriteListView = (ListView) rootView.findViewById(R.id.novel_list_favorite);
-        favoriteListView.setAdapter(favoriteAdapter);
+        ListView favoriteListView = (ListView) rootView.findViewById(R.id.novel_list_favorite);
+        mCursorAdapter = new NovelCursorAdapter(getContext(), null);
+        favoriteListView.setAdapter(mCursorAdapter);
 
         favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getContext(), ChapterActivity.class);
-                intent.putExtra(MainActivity.EXTRA_NOVEL_NAME, favoriteNovelList.get(position).getNovelName());
-                intent.putExtra(MainActivity.EXTRA_NOVEL_LINK, favoriteNovelList.get(position).getNovelLink());
+                Uri uri = ContentUris.withAppendedId(NovelEntry.CONTENT_URI, id);
+                intent.setData(uri);
                 startActivity(intent);
             }
         });
@@ -81,46 +73,56 @@ public class FavoriteFragment extends Fragment {
         return rootView;
     }
 
-    public void removeNovel(int position) {
-
-        String novelName = favoriteNovelList.get(position).getNovelName();
-        String novelLink = favoriteNovelList.get(position).getNovelLink();
-
-        context.getNovelsFragment().addNovel(new Novel(novelName, novelLink));
-
-        favoriteNovelList.remove(position);
-
-        boolean removedSuccessful = mFavoriteNovelDb.delete(mFavoriteNovelDb.getReadableDatabase(), novelName);
-        if (removedSuccessful) {
-            Toast.makeText(rootView.getContext(), "Novel removed.", Toast.LENGTH_SHORT).show();
-            displayDatabaseInfo();
-        } else {
-            Toast.makeText(rootView.getContext(), "Error deleting novel", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        displayDatabaseInfo();
-        super.onResume();
-    }
-
-    public void displayDatabaseInfo() {
-        favoriteNovelList = new ArrayList<>(mFavoriteNovelDb.getFavorites(mFavoriteNovelDb.getReadableDatabase()));
-        Collections.sort(favoriteNovelList, new NovelComparator());
-        favoriteAdapter.clear();
-        favoriteAdapter.addAll(favoriteNovelList);
-        favoriteAdapter.notifyDataSetChanged();
-    }
-
-    public List<Novel> getFavoriteList() {
-        return favoriteNovelList;
-    }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        menu.findItem(R.id.action_reload).setVisible(true);
+        // menu.findItem(R.id.action_reset).setVisible(false);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // User clicked on a menu option in the app bar overflow menu
+        switch (item.getItemId()) {
+            case R.id.action_settings: /*
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent); */
+                return true;
+            case R.id.action_reset:
+                WEBPARSE.parseNovelLinks(WUXIAWORLD, context.getNovelsFragment()); // novelsFragment handles reloading data
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {
+                NovelEntry._ID,
+                NovelEntry.COLUMN_NOVEL_NAME,
+                NovelEntry.COLUMN_NOVEL_TOC_LINK,
+                NovelEntry.COLUMN_NOVEL_IS_FAVORITE
+
+        };
+        String selection = NovelEntry.COLUMN_NOVEL_IS_FAVORITE + "=?";
+        String[] selectionArgs = { "1" };
+
+        return new CursorLoader(getContext(),
+                NovelContract.NovelEntry.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mCursorAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mCursorAdapter.swapCursor(null);
     }
 
 }

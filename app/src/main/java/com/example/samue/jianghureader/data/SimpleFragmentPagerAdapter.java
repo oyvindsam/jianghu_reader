@@ -1,10 +1,11 @@
-package com.example.samue.jianghureader;
+package com.example.samue.jianghureader.data;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.example.samue.jianghureader.R;
 import com.example.samue.jianghureader.layout.FavoriteFragment;
 import com.example.samue.jianghureader.layout.NovelsFragment;
 
@@ -14,8 +15,8 @@ import com.example.samue.jianghureader.layout.NovelsFragment;
 
 public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
     private Context mContext;
-    FavoriteFragment favoriteFragment;
-    NovelsFragment novelsFragment;
+    private FavoriteFragment favoriteFragment; // liste over favoritter
+    private NovelsFragment novelsFragment; // resterende noveller
 
     public SimpleFragmentPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
@@ -43,9 +44,6 @@ public class SimpleFragmentPagerAdapter extends FragmentPagerAdapter {
                 return null;
         }
     }
-
-
-
 
     @Override
     public int getCount() {

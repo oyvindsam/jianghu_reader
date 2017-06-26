@@ -1,6 +1,6 @@
 package com.example.samue.jianghureader.data;
 
-import com.example.samue.jianghureader.Novel;
+import com.example.samue.jianghureader.model.Novel;
 
 import java.util.Comparator;
 

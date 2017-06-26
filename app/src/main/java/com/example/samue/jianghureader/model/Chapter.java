@@ -1,4 +1,4 @@
-package com.example.samue.jianghureader;
+package com.example.samue.jianghureader.model;
 
 /**
  * Created by samue on 14.03.2017.
@@ -6,18 +6,12 @@ package com.example.samue.jianghureader;
 
 public class Chapter {
 
-    private String novelName;
     private String chapterName;
     private String chapterLink;
 
-    public Chapter(String novelName, String chapterName, String chapterLink) {
-        this.novelName = novelName;
+    public Chapter(String chapterName, String chapterLink) {
         this.chapterName = chapterName;
         this.chapterLink = chapterLink;
-    }
-
-    public String getNovelName() {
-        return novelName;
     }
 
     public String getChapterName() {

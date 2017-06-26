@@ -21,8 +21,8 @@
         android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_reload"
-        android:title="@string/action_reload"
+        android:id="@+id/action_reset"
+        android:title="@string/action_reset"
         app:showAsAction="never"
         />
 

@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.example.samue.jianghureader.model.Chapter;
+
 import java.util.List;
 
 /**
@@ -17,8 +19,8 @@ import java.util.List;
 
 public class ChapterAdapter extends ArrayAdapter<Chapter> {
 
-    public ChapterAdapter(Context context, List<Chapter> chapterItems) {
-        super(context, 0, chapterItems);
+    public ChapterAdapter(Context context, List<Chapter> chapters) {
+        super(context, 0, chapters);
     }
 
     @NonNull
@@ -28,6 +30,7 @@ public class ChapterAdapter extends ArrayAdapter<Chapter> {
         if (listItemView == null) {
             listItemView = LayoutInflater.from(getContext()).inflate(R.layout.chapter_item, parent, false);
         }
+
         Chapter currentChapter = getItem(position);
 
         TextView chapterName = (TextView) listItemView.findViewById(R.id.chapter_name);

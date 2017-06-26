@@ -1,4 +1,4 @@
-package com.example.samue.jianghureader;
+package com.example.samue.jianghureader.model;
 
 /**
  * Created by samue on 14.03.2017.
