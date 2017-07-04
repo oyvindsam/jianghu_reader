@@ -11,6 +11,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -50,10 +52,10 @@ public class NovelsFragment extends Fragment implements
 
     private static final String LOG_ID = NovelsFragment.class.getSimpleName();
 
-    ListView novelList;
-    View rootView;
-    ImageView imgBtnAdd;
+    private RecyclerView mRecyclerView;
     private NovelCursorAdapter mCursorAdapter;
+
+    private View rootView;
     private static int LOADER_ID = 1;
 
     MainActivity context;
@@ -78,15 +80,11 @@ public class NovelsFragment extends Fragment implements
         rootView = inflater.inflate(R.layout.frag_novels, container, false);
 
         context.getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+
         mCursorAdapter = new NovelCursorAdapter(getContext(), null);
-
-        novelList = (ListView) rootView.findViewById(R.id.novel_list);
-        imgBtnAdd = (ImageView) rootView.findViewById(R.id.btn_add_novel);
-
-        progress = (ProgressBar) rootView.findViewById(R.id.loading_spinner_novels);
-        progress.setVisibility(View.GONE);
-
-        novelList.setAdapter(mCursorAdapter);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.rv_novel);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(layoutManager);
 
         novelList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -98,6 +96,9 @@ public class NovelsFragment extends Fragment implements
                 startActivity(intent);
             }
         });
+
+        progress = (ProgressBar) rootView.findViewById(R.id.loading_spinner_novels);
+        progress.setVisibility(View.GONE);
 
         return rootView;
     }

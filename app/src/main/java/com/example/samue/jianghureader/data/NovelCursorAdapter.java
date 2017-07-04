@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,11 +25,28 @@ import com.example.samue.jianghureader.layout.NovelsFragment;
  * Created by samue on 12.04.2017.
  */
 
-public class NovelCursorAdapter extends CursorAdapter {
+public class NovelRVCursorAdapter extends
+        RecyclerView.Adapter<NovelRVCursorAdapter.NovelRVCursorAdapterViewHolder> {
 
     private final Context mContext;
     private int position = 0;
 
+    // --------------------------------------------------------------------
+    @Override
+    public NovelRVCursorAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return null;
+    }
+
+    @Override
+    public void onBindViewHolder(NovelRVCursorAdapterViewHolder holder, int position) {
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return 0;
+    }
+    // ---------------------------------------------------------------------
 
     public NovelCursorAdapter(Context context, Cursor c) {
         super(context, c, 0 /*flags*/);
@@ -102,6 +120,16 @@ public class NovelCursorAdapter extends CursorAdapter {
 
         }
 
+
+    }
+
+    public class NovelRVCursorAdapterViewHolder extends RecyclerView.ViewHolder {
+
+        public NovelRVCursorAdapterViewHolder(View view) {
+            super(view);
+
+
+        }
 
     }
 

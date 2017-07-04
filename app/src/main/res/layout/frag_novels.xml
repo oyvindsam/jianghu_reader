@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_novel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="8dp"
+        style="@style/CardViewList"
+        tools:text="Dummy text"/>
 
-        <ProgressBar
-            android:id="@+id/loading_spinner_novels"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_centerHorizontal="true"
-            android:elevation="1dp"
-            android:theme="@style/CircularProgress" />
-
-        <ListView
-            android:id="@+id/novel_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="8dp"
-            style="@style/CardViewList"
-            tools:text="Dummy text"/>
+    <ProgressBar
+        android:id="@+id/loading_spinner_novels"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center_horizontal"
+        android:theme="@style/CircularProgress" />
 
 
-    </RelativeLayout>
-
-
-</LinearLayout>
+</FrameLayout>
