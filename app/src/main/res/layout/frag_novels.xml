@@ -6,40 +6,6 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-
-        <Button
-            android:id="@+id/btn_wuxiaworld"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="12sp"
-            android:text="@string/site1"
-            />
-
-        <Button
-            android:id="@+id/btn_translation_n"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="12sp"
-            android:text="@string/site2"/>
-
-
-        <Button
-            android:id="@+id/btn_yxhq"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="12sp"
-            android:text="@string/site3"/>
-
-    </LinearLayout>
-
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
