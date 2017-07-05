@@ -3,7 +3,6 @@ package com.example.samue.jianghureader.data;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.example.samue.jianghureader.layout.ChaptersFragment;
 import com.example.samue.jianghureader.model.Chapter;
 import com.example.samue.jianghureader.model.Novel;
 import com.example.samue.jianghureader.model.ReadingPage;
@@ -179,9 +178,9 @@ public class WebParse {
 
                 readingPage.setChapterLink(chapterLink); // link to chapter
                 readingPage.setChapterHeader(chapterHeader); // chapter header
-                readingPage.setNovelPrevLink(prevLink); // prev link
-                readingPage.setNovelNextLink(nextLink); // next link
-                readingPage.setNovelText(mainText); // novel text
+                readingPage.setChapterPrevLink(prevLink); // prev link
+                readingPage.setChapterNextLink(nextLink); // next link
+                readingPage.setChapterText(mainText); // novel text
 
                 if (readingPage.illegalState()) { // check if some values are not set
                     return null; // pass null to onPostExecute, so calling activity can handle error loading

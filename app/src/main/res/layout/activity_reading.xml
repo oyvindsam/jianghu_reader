@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,15 +8,6 @@
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
          TextureView, etc. -->
-    <ProgressBar
-        android:id="@+id/loading_spinner_reading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_centerHorizontal="true"
-        android:elevation="1dp"
-        style="@style/Widget.AppCompat.ProgressBar"
-        android:theme="@style/CircularProgress" />
 
     <ScrollView
         android:id="@+id/fullscreen_content"
@@ -116,5 +107,16 @@
 
     </ScrollView>
 
+    <ProgressBar
+        android:id="@+id/loading_spinner_reading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center_horizontal"
+        style="@style/Widget.AppCompat.ProgressBar"
+        android:theme="@style/CircularProgress"
+        android:visibility="invisible"
+        tools:visibility="visible"/>
 
-</RelativeLayout>
+
+</FrameLayout>

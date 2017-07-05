@@ -6,7 +6,8 @@ package com.example.samue.jianghureader.model;
 
 public class ReadingPage {
 
-    private  String chapterLink, chapterHeader, novelText, novelNextLink, novelPrevLink;
+
+    private  String chapterLink, chapterHeader, chapterText, chapterNextLink, chapterPrevLink;
 
     public ReadingPage(){}
 
@@ -27,31 +28,31 @@ public class ReadingPage {
         this.chapterHeader = novelName;
     }
 
-    public String getNovelText() {
-        return novelText;
+    public String getChapterText() {
+        return chapterText;
     }
 
-    public void setNovelText(String novelText) {
-        this.novelText = novelText;
+    public void setChapterText(String chapterText) {
+        this.chapterText = chapterText;
     }
 
-    public String getNovelNextLink() {
-        return novelNextLink;
+    public String getChapterNextLink() {
+        return chapterNextLink;
     }
 
-    public void setNovelNextLink(String novelNextLink) {
-        this.novelNextLink = novelNextLink;
+    public void setChapterNextLink(String chapterNextLink) {
+        this.chapterNextLink = chapterNextLink;
     }
 
-    public String getNovelPrevLink() {
-        return novelPrevLink;
+    public String getChapterPrevLink() {
+        return chapterPrevLink;
     }
 
-    public void setNovelPrevLink(String novelPrevLink) {
-        this.novelPrevLink = novelPrevLink;
+    public void setChapterPrevLink(String chapterPrevLink) {
+        this.chapterPrevLink = chapterPrevLink;
     }
 
     public boolean illegalState() {
-        return chapterLink == null || chapterHeader == null || novelNextLink == null || novelPrevLink == null;
+        return chapterLink == null || chapterHeader == null || chapterNextLink == null || chapterPrevLink == null;
     }
 }

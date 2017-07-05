@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -22,32 +21,32 @@ import android.widget.Toast;
 
 import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
 import com.example.samue.jianghureader.data.WebParsingInterface;
-import com.example.samue.jianghureader.layout.NovelsFragment;
 import com.example.samue.jianghureader.model.ReadingPage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_LINK;
-import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_NAME;
 import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
 
 
 public class ReadingActivity extends AppCompatActivity implements WebParsingInterface<ReadingPage> {
 
     private static final String LOG_ID = ReadingActivity.class.getSimpleName();
+    public static final String CHAPTER_LINK = "chapter_link";
+    public static final String CHAPTER_HEADER = "chapter_header";
+    public static final String CHAPTER_TEXT = "chapter_text";
+    public static final String NEXT_LINK = "next_link";
+    public static final String PREV_LINK = "prev_link";
 
-    String chapterLink, nextLink, prevLink;
+
+    String chapterLink, chapterHeader, chapterText, nextLink, prevLink;
     private Uri mUri;
     ScrollView scrollView;
-    TextView novelTextView, novelHeader, prevTextView, nextTextView, prevBottomTextView,
+    TextView novelTextView, chapterHeaderTextView, prevTopTextView, nextTopTextView, prevBottomTextView,
             nextBottomTextView;
     ProgressBar progress;
-    List<String> novelInfoList;
+    private boolean mShowNavigationHint;
 
-    Display mdisp;
-    Point mdispSize;
-    int maxY, touchSlop;
     int xCor, yCor, maxWidth, maxHeight;
 
 
@@ -61,13 +60,8 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
      */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 1000;
+    private static final int AUTO_HIDE_DELAY_MILLIS = 100;
 
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
     private final Handler mHideHandler = new Handler();
     //private View scrollView;
     private final Runnable mHidePart2Runnable = new Runnable() {
@@ -123,6 +117,8 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_reading);
+        Log.v(LOG_ID, "onCreate called");
+
 
         mVisible = true;
         scrollView = (ScrollView) findViewById(R.id.fullscreen_content);
@@ -141,18 +137,26 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         // while interacting with the UI.
 
         novelTextView = (TextView) findViewById(R.id.main_text_view);
-        novelHeader = (TextView) findViewById(R.id.novel_name_header_novel);
-        prevTextView = (TextView) findViewById(R.id.prev_link_text_view);
-        nextTextView = (TextView) findViewById(R.id.next_link_text_view);
+        chapterHeaderTextView = (TextView) findViewById(R.id.novel_name_header_novel);
+        prevTopTextView = (TextView) findViewById(R.id.prev_link_text_view);
+        nextTopTextView = (TextView) findViewById(R.id.next_link_text_view);
         prevBottomTextView = (TextView) findViewById(R.id.prev_link_text_view_bottom);
         nextBottomTextView = (TextView) findViewById(R.id.next_link_text_view_bottom);
         progress = (ProgressBar) findViewById(R.id.loading_spinner_reading);
 
         scrollView.setVerticalScrollBarEnabled(false);
-        prevTextView.setPaintFlags(prevTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG); // underline under text
-        nextTextView.setPaintFlags(nextTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+        prevTopTextView.setPaintFlags(prevTopTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG); // underline under text
+        nextTopTextView.setPaintFlags(nextTopTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         prevBottomTextView.setPaintFlags(prevBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         nextBottomTextView.setPaintFlags(nextBottomTextView.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
+
+        prevTopTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startWebParse(prevLink);
+            }
+        });
+
 
         // touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
 
@@ -163,6 +167,17 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         display.getSize(size);
         maxWidth = size.x;
         maxHeight = size.y;
+
+        novelTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    xCor = (int) event.getRawX();
+                    yCor = (int) event.getRawY();
+                }
+                return false;
+            }
+        });
 
         novelTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,51 +193,85 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
                     scrollView.setVerticalScrollBarEnabled(true);
                 }
                 else if (touchLocationY < 40) { // Upper part of screen 0 - 40%
-                    scrollView.scrollBy(0, -(maxHeight - 20)); // scroll up
+                    scrollView.scrollBy(0, -(maxHeight - 10)); // scroll up
                 } else { // lower part of screen 70% +
-                    scrollView.scrollBy(0, +(maxHeight - 20)); // scroll down
+                    scrollView.scrollBy(0, +(maxHeight - 10)); // scroll down
                 }
             }
         });
 
-        novelTextView.setOnTouchListener(new View.OnTouchListener() {
+
+        prevTopTextView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            public void onClick(View v) {
+                startWebParse(prevLink);
+            }
+        });
+        prevBottomTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startWebParse(prevLink);
+            }
+        });
 
-                    xCor = (int) event.getRawX();
-                    yCor = (int) event.getRawY();
-                }
-                return false;
+        nextBottomTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startWebParse(nextLink);
+            }
+        });
+        nextTopTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startWebParse(nextLink);
             }
         });
 
 
+        if(savedInstanceState != null) {
+            ReadingPage rp = new ReadingPage();
+            rp.setChapterLink(savedInstanceState.getString(CHAPTER_LINK));
+            rp.setChapterHeader(savedInstanceState.getString(CHAPTER_HEADER));
+            rp.setChapterText(savedInstanceState.getString(CHAPTER_TEXT));
+            rp.setChapterNextLink(savedInstanceState.getString(NEXT_LINK));
+            rp.setChapterPrevLink(savedInstanceState.getString(PREV_LINK));
+            mUri = Uri.parse(savedInstanceState.getString("uri"));
+            setNovelText(rp);
+            mVisible = savedInstanceState.getBoolean("navigation_visible");
+            //scrollView.setScrollY(savedInstanceState.getInt("scroll"));
+        } else {
 
-        novelInfoList = new ArrayList<>();
+            // Received intent ------------------------------------------------------------------------
+            Intent intent = getIntent();
+            chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
+            mUri = intent.getData();
+            Log.v(LOG_ID, mUri.toString());
 
-        // Received intent ------------------------------------------------------------------------
-        Intent intent = getIntent();
+            WEBPARSE.parseReadingPage(chapterLink, this);
+        }
 
-        chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
-        mUri = intent.getData();
-        Log.v(LOG_ID, mUri.toString());
-
-        WEBPARSE.parseReadingPage(chapterLink, this);
-    }
-
-    private void setTouchCordinates(double x, double y) {
-        xCor = (int) x;
-        yCor = (int) y;
+        scrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.fullScroll(ScrollView.FOCUS_UP);
+            }
+        });
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        mVisible = true;
-        toggle(); // immersive mode
-    }
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.v(LOG_ID, "onSaveInstanceState called");
 
+        outState.putString(CHAPTER_LINK, chapterLink);
+        outState.putString(CHAPTER_HEADER, chapterHeader);
+        outState.putString(CHAPTER_TEXT, chapterText);
+        outState.putString(NEXT_LINK, nextLink);
+        outState.putString(PREV_LINK, prevLink);
+        //outState.putInt("scroll", scrollView.getScrollY());
+        outState.putString("uri", mUri.toString());
+        outState.putBoolean("navigation_visible", mVisible);
+        super.onSaveInstanceState(outState);
+    }
 
     private void updateLastChapter(String chapterLink) {
         ContentValues values = new ContentValues();
@@ -241,53 +290,20 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     public void setNovelText(final ReadingPage readingPage) {
 
         chapterLink = readingPage.getChapterLink(); // so "last" novel visited
-        nextLink = readingPage.getNovelNextLink();
-        prevLink = readingPage.getNovelPrevLink();
+        chapterHeader = readingPage.getChapterHeader();
+        chapterText = readingPage.getChapterText();
+        nextLink = readingPage.getChapterNextLink();
+        prevLink = readingPage.getChapterPrevLink();
 
         updateLastChapter(chapterLink);
 
-        novelTextView.setText(readingPage.getNovelText()); // main text
-        novelHeader.setText(readingPage.getChapterHeader()); // novel name
-        prevTextView.setText(getString(R.string.previous)); // Setting text here so it looks cleaner when opening for first time
-        nextTextView.setText(getString(R.string.next));
+        novelTextView.setText(chapterText); // main text
+        chapterHeaderTextView.setText(chapterHeader); // novel name
+        prevTopTextView.setText(getString(R.string.previous)); // Setting text here so it looks cleaner when opening for first time
+        nextTopTextView.setText(getString(R.string.next));
         prevBottomTextView.setText(getString(R.string.previous));
         nextBottomTextView.setText(getString(R.string.next));
 
-
-        prevTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startWebParse(prevLink);
-            }
-        });
-
-        nextTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startWebParse(nextLink);
-            }
-        });
-
-        prevBottomTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startWebParse(prevLink);
-            }
-        });
-
-        nextBottomTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startWebParse(nextLink);
-            }
-        });
-
-        scrollView.post(new Runnable() {
-            @Override
-            public void run() {
-                scrollView.fullScroll(ScrollView.FOCUS_UP);
-            }
-        });
     }
 
     private void startWebParse(String link) {
@@ -307,6 +323,7 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         }
         setNovelText(readingText.get(0)); // only one element
         progress.setVisibility(View.GONE);
+        delayedHide(AUTO_HIDE_DELAY_MILLIS);
     }
 
     private void errorLoading() {
@@ -314,27 +331,44 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         finish();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.v(LOG_ID, "onResume called");
+        delayedHide(AUTO_HIDE_DELAY_MILLIS);
+    }
     // --------------------- Fullscreen controls --------------------------------------
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-
+        Log.v(LOG_ID, "onPostCreate called");
         // Trigger the initial hide() shortly after the activity has been
         // created, to briefly hint to the user that UI controls
         // are available.
-        delayedHide(100);
+        if (savedInstanceState != null && mVisible) { // rotating
+            Log.v(LOG_ID, "onPostC -- hiding... ");
+            hide();
+        }
     }
 
     private void toggle() {
         if (mVisible) {
+            Log.v(LOG_ID, "toggle called, mVisible TRUE, hiding...");
             hide();
         } else {
+            Log.v(LOG_ID, "toggle called, mVisible FALSE, showing...");
             show();
         }
     }
 
     private void hide() {
+        Log.v(LOG_ID, "Hide called, mVisible: " + mVisible);
         // Hide UI first
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -343,7 +377,7 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         mVisible = false;
 
         // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+        mHideHandler.postDelayed(mHidePart2Runnable, AUTO_HIDE_DELAY_MILLIS);
         mHideHandler.postDelayed(mToggleScrollBar, AUTO_HIDE_DELAY_MILLIS);
 
     }
@@ -364,6 +398,8 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
      * previously scheduled calls.
      */
     private void delayedHide(int delayMillis) {
+        Log.v(LOG_ID, "delayedHide called");
+        mVisible = false;
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
