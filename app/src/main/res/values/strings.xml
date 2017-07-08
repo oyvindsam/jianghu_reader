@@ -17,6 +17,16 @@
     <string name="set_last_novel_load">Load chapter</string>
     <string name="set_last_novel_cancel">Cancel</string>
 
+    <string name="pref_list_asc_label">List chapters ascending</string>
+    <string name="pref_list_asc_key">list_asc</string>
+    <string name="pref_list_asc_summary">Ascending</string>
+    <string name="pref_list_desc_summary">Descending</string>
+
+<string name="action_share_chapter_link">Share chapter link</string>
+
+
+
+
     <string name="lorem_ipsum">                                                                     Book 24, The Starlord of Fogstone, Chapter 1 – Leaving the Three Realms
                                                                      \n\n
                                                                      An Immortal estate located within the primordial chaos. This estate was a few kilometers in size, and it was filled with creeks, small streams, flowers, and grass.
@@ -50,9 +60,4 @@
                                                                      “Young master…” Autumn Leaf said worriedly, “Let me go with you.”
 
                                                                      “No need.” Ning shook his head.</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
-
 </resources>

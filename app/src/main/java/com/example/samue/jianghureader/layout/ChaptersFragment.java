@@ -1,15 +1,19 @@
 package com.example.samue.jianghureader.layout;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NavUtils;
 import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +28,7 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.samue.jianghureader.ChapterActivity;
 import com.example.samue.jianghureader.data.WebParsingInterface;
 import com.example.samue.jianghureader.model.Chapter;
 import com.example.samue.jianghureader.ChapterAdapter;
@@ -43,7 +48,8 @@ import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
  * Created by samue on 11.04.2017.
  */
 
-public class ChaptersFragment extends Fragment implements WebParsingInterface<Chapter> {
+public class ChaptersFragment extends Fragment implements WebParsingInterface<Chapter>,
+        SharedPreferences.OnSharedPreferenceChangeListener  {
 
     private static final int CURSOR_NOVEL_NAME = 0;
     private static final int CURSOR_NOVEL_LINK = 1;
@@ -56,6 +62,8 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
     private ChapterAdapter adapter;
     private List<Chapter> chapterLinks;
     private Uri mUri;
+    private boolean mListChaptersAsc = true;
+    private ChapterActivity mContext;
 
     public ChaptersFragment() {}
 
@@ -68,6 +76,7 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_chapter, container, false);
+        mContext = (ChapterActivity) getContext();
         setHasOptionsMenu(true);
 
         progress = (ProgressBar) rootView.findViewById(R.id.loading_spinner_chapter);
@@ -76,8 +85,6 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
         // Get URI, get cursor, extract data from cursor
         Intent intent = getActivity().getIntent(); // get intent from chapterActivity
         mUri = intent.getData();
-
-        Log.v(LOG_ID, mUri.toString());
 
         String[] projection = {
                 NovelEntry.COLUMN_NOVEL_NAME,
@@ -103,20 +110,19 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
         getActivity().setTitle(novelName);
 
         FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        if (!TextUtils.isEmpty(novelLastChapterLink)) {
+            fab.setVisibility(View.VISIBLE);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                if (!TextUtils.isEmpty(novelLastChapterLink)) {
                     Intent intent = new Intent(getContext(), ReadingActivity.class);
                     intent.putExtra(EXTRA_NOVEL_LINK, novelLastChapterLink);
                     intent.setData(mUri);
                     startActivity(intent);
-                } else {
-                    Toast.makeText(getContext(), "No recent chapter found", Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
+        }
 
 
         chapterLinks = new ArrayList<>();
@@ -140,13 +146,36 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
 
         WEBPARSE.parseChapterLinks(novelToCLink, this);
 
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        mListChaptersAsc = sharedPreferences.getBoolean(getString(R.string.pref_list_asc_key),
+                getResources().getBoolean(R.bool.pref_list_default));
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
         return rootView;
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_list_asc_key))) {
+            mListChaptersAsc = sharedPreferences.getBoolean(key,
+                    getResources().getBoolean(R.bool.pref_list_default));
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // Unregister VisualizerActivity as an OnPreferenceChangedListener to avoid any memory leaks.
+        PreferenceManager.getDefaultSharedPreferences(mContext)
+                .unregisterOnSharedPreferenceChangeListener(this);
+    }
 
     public void setChapterLinks(List<Chapter> newChapterLinks) {
         adapter.clear();
         adapter.addAll(newChapterLinks);
+        if (!mListChaptersAsc) {
+            reverseChapters();
+        }
         progress.setVisibility(View.INVISIBLE);
     }
 
@@ -181,6 +210,9 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
                 return true;
             case R.id.action_set_last_chapter:
                 showSetLastChapterDialog();
+                return true;
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(mContext);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -250,4 +282,6 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
         Log.v(LOG_ID, temp1 + " / " + temp2);
         return temp1.equals(temp2);
     }
+
+
 }

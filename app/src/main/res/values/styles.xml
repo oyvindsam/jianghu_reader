@@ -10,20 +10,13 @@
         <item name="android:scrollbarTrackVertical">@android:color/transparent</item>
         <item name="android:scrollbarThumbVertical">@color/colorDarkGray</item>
         <item name="android:scrollbarStyle">outsideOverlay</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+
     </style>
 
-    <style name="FullscreenTheme" parent="AppTheme">
-        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
+    <style name="ReadingActivityTheme" parent="AppTheme">
         <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:windowBackground">@null</item>
-        <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
-        <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
-    </style>
-
-    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
+        <item name="windowActionBarOverlay">true</item>
     </style>
 
     <style name="CategoryTab" parent="Widget.Design.TabLayout">
@@ -35,10 +28,6 @@
     <style name="CategoryTabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textColor">#A8A19E</item>
     </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="HeaderText" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@color/colorLightGray</item>

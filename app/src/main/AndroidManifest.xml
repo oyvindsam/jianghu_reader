@@ -12,14 +12,29 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.example.samue.jianghureader.MainActivity">
+        <activity android:name="com.example.samue.jianghureader.MainActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.example.samue.jianghureader.ReadingActivity">
+
+        <activity android:name="com.example.samue.jianghureader.ChapterActivity"
+            android:parentActivityName=".MainActivity"
+            android:launchMode="singleTop">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".ChapterActivity" />
+        </activity>
+
+        <activity
+            android:name="com.example.samue.jianghureader.ReadingActivity"
+            android:theme="@style/ReadingActivityTheme"
+            android:parentActivityName=".ChapterActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ChapterActivity"/>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -32,11 +47,16 @@
                 <data android:host="www.wuxiaworld.com" />
                 <data android:host="m.wuxiaworld.com" />
             </intent-filter>
-            android:configChanges="orientation|keyboardHidden|screenSize" />
-            android:theme="@style/FullscreenTheme" />
+
         </activity>
-        <activity android:name="com.example.samue.jianghureader.ChapterActivity" />
-        <activity android:name="com.example.samue.jianghureader.SettingsActivity"></activity>
+        <activity android:name="com.example.samue.jianghureader.SettingsActivity"
+            android:label="Settings"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SettingsActivity" />
+        </activity>
+
         <provider
             android:name=".data.NovelProvider"
             android:authorities="com.example.samue.jianghureader"

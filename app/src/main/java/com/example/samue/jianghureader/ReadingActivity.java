@@ -6,12 +6,17 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.net.Uri;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -115,10 +120,15 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().hide();
         setContentView(R.layout.activity_reading);
         Log.v(LOG_ID, "onCreate called");
 
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.hide();
+        }
 
         mVisible = true;
         scrollView = (ScrollView) findViewById(R.id.fullscreen_content);
@@ -250,12 +260,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
             WEBPARSE.parseReadingPage(chapterLink, this);
         }
 
-        scrollView.post(new Runnable() {
-            @Override
-            public void run() {
-                scrollView.fullScroll(ScrollView.FOCUS_UP);
-            }
-        });
     }
 
     @Override
@@ -304,6 +308,12 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         prevBottomTextView.setText(getString(R.string.previous));
         nextBottomTextView.setText(getString(R.string.next));
 
+        scrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                scrollView.fullScroll(ScrollView.FOCUS_UP);
+            }
+        });
     }
 
     private void startWebParse(String link) {
@@ -323,7 +333,7 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         }
         setNovelText(readingText.get(0)); // only one element
         progress.setVisibility(View.GONE);
-        delayedHide(AUTO_HIDE_DELAY_MILLIS);
+        //delayedHide(AUTO_HIDE_DELAY_MILLIS);
     }
 
     private void errorLoading() {
@@ -385,6 +395,10 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     @SuppressLint("InlinedApi")
     private void show() {
         // Show the system bar
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.show();
+        }
         scrollView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mVisible = true;
@@ -406,4 +420,28 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
 
     // ----------------------------------------------------------------------------------
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // User clicked on a menu option in the app bar overflow menu
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+            case R.id.action_share_chapter:
+                shareChapterLink();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void shareChapterLink() {
+        String mimeType = "text/plain";
+        String title = "Share chapter link";
+        ShareCompat.IntentBuilder.from(this)
+                .setChooserTitle(title)
+                .setType(mimeType)
+                .setText(chapterLink)
+                .startChooser();
+    }
 }

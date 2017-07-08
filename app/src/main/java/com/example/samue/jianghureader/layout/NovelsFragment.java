@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.samue.jianghureader.ChapterActivity;
 import com.example.samue.jianghureader.MainActivity;
+import com.example.samue.jianghureader.SettingsActivity;
 import com.example.samue.jianghureader.data.WebParsingInterface;
 import com.example.samue.jianghureader.model.Novel;
 import com.example.samue.jianghureader.data.NovelCursorAdapter;
@@ -56,7 +57,6 @@ public class NovelsFragment extends Fragment implements
     private NovelCursorAdapter mCursorAdapter;
     private static int LOADER_ID = 1;
 
-    private Button btnWW, btnTN, btnYx;
     MainActivity context;
     ProgressBar progress;
 
@@ -101,14 +101,6 @@ public class NovelsFragment extends Fragment implements
         });
 
 
-        btnWW = (Button) rootView.findViewById(R.id.btn_wuxiaworld);
-        btnWW.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), "Updating", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         Cursor cursor = getActivity().getContentResolver().query(
                 NovelEntry.CONTENT_URI,
                 null,
@@ -133,9 +125,9 @@ public class NovelsFragment extends Fragment implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
-            case R.id.action_settings: /*
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivity(settingsIntent); */
+            case R.id.action_settings:
+                Intent settingsIntent = new Intent(context, SettingsActivity.class);
+                startActivity(settingsIntent);
                 return true;
             case R.id.action_reset:
                 WEBPARSE.parseNovelLinks(WUXIAWORLD, this);

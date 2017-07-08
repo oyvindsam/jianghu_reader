@@ -21,6 +21,7 @@ import android.widget.ListView;
 
 import com.example.samue.jianghureader.ChapterActivity;
 import com.example.samue.jianghureader.MainActivity;
+import com.example.samue.jianghureader.SettingsActivity;
 import com.example.samue.jianghureader.data.NovelCursorAdapter;
 import com.example.samue.jianghureader.R;
 import com.example.samue.jianghureader.data.NovelContract;
@@ -83,9 +84,9 @@ public class FavoriteFragment extends Fragment implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
-            case R.id.action_settings: /*
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivity(settingsIntent); */
+            case R.id.action_settings:
+                Intent settingsIntent = new Intent(context, SettingsActivity.class);
+                startActivity(settingsIntent);
                 return true;
             case R.id.action_reset:
                 WEBPARSE.parseNovelLinks(WUXIAWORLD, context.getNovelsFragment()); // novelsFragment handles reloading data
