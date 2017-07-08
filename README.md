@@ -1,6 +1,8 @@
 # jianghu_reader
 Very simple novel reader app, very wip. Using JSoup to crawl novel sites. Currently only wuxiaworld "active" novels, but will add more in the future. 
+
 Features:
+
 -Save favorites
 
 -Easy, clean UI
@@ -13,6 +15,7 @@ Features:
 
 
 Test .apk is in "Additional files" folder if you want to try, or build yourself. 
+
 
 TODO:
 
