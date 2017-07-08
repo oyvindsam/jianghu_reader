@@ -1,17 +1,26 @@
 package com.example.samue.jianghureader;
 
 import android.annotation.SuppressLint;
+//import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.net.Uri;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
+
+//import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -25,16 +34,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
+import com.example.samue.jianghureader.data.WebParse;
 import com.example.samue.jianghureader.data.WebParsingInterface;
 import com.example.samue.jianghureader.model.ReadingPage;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_LINK;
 import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
 
 
-public class ReadingActivity extends AppCompatActivity implements WebParsingInterface<ReadingPage> {
+public class ReadingActivity extends AppCompatActivity implements WebParsingInterface<ReadingPage>,
+        LoaderCallbacks<List<ReadingPage>> {
 
     private static final String LOG_ID = ReadingActivity.class.getSimpleName();
     public static final String CHAPTER_LINK = "chapter_link";
@@ -42,6 +60,7 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     public static final String CHAPTER_TEXT = "chapter_text";
     public static final String NEXT_LINK = "next_link";
     public static final String PREV_LINK = "prev_link";
+    private static final int LOADER_ID = 3;
 
 
     String chapterLink, chapterHeader, chapterText, nextLink, prevLink;
@@ -257,7 +276,11 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
             mUri = intent.getData();
             Log.v(LOG_ID, mUri.toString());
 
-            WEBPARSE.parseReadingPage(chapterLink, this);
+            //WEBPARSE.parseReadingPage(chapterLink, this);
+            LoaderCallbacks<List<ReadingPage>> callback = ReadingActivity.this;
+            Bundle bundle = new Bundle();
+            bundle.putString("link", chapterLink);
+            getSupportLoaderManager().initLoader(LOADER_ID, bundle, callback);
         }
 
     }
@@ -317,7 +340,10 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     }
 
     private void startWebParse(String link) {
-        WEBPARSE.parseReadingPage(link, this);
+        //WEBPARSE.parseReadingPage(link, this);
+        Bundle bundle = new Bundle();
+        bundle.putString("link", link);
+        getSupportLoaderManager().restartLoader(LOADER_ID, bundle, this);
     }
 
     @Override
@@ -443,5 +469,97 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
                 .setType(mimeType)
                 .setText(chapterLink)
                 .startChooser();
+    }
+
+    @Override
+    public Loader<List<ReadingPage>> onCreateLoader(int id, final Bundle args) {
+        return new AsyncTaskLoader<List<ReadingPage>>(this) {
+            String mLink = args.getString("link");
+            List<ReadingPage> mNovelInfo = null;
+
+            @Override
+            protected void onStartLoading() {
+                if (mNovelInfo != null) {
+                    deliverResult(mNovelInfo);
+                } else {
+                    //startLoading();
+                    progress.setVisibility(View.VISIBLE);
+                    forceLoad();
+                }
+            }
+
+            @Override
+            public List<ReadingPage> loadInBackground() {
+                List<ReadingPage> novelInfo = new ArrayList<>();
+                String prevLink = "";
+                String nextLink = "";
+                String chapterHeader = "";
+
+                String mainText = "";
+                ReadingPage readingPage = new ReadingPage();
+                Log.v(LOG_ID, mLink);
+                if (!mLink.startsWith("http://")) { // fix for pasting link without http prefix
+                    mLink = "http://" + mLink;
+                }
+                try {
+                    Document doc = Jsoup.connect(mLink).get();
+                    chapterHeader = doc.select("h1[class=entry-title]").text();
+                    Elements elements = doc.select("div[itemprop=articleBody]");
+                    Elements links = doc.select("a[href]");
+                    Elements paragraphElements = elements.select("p");
+                    // Add cancel method and mor try catch.
+                    for (Element link : links) {
+                        if (link.text().equals("Previous Chapter") && prevLink.length() < 1) {
+                            prevLink += link.attr("href");
+                        } else if (link.text().equals("Next Chapter") && nextLink.length() < 1) {
+                            nextLink += link.attr("href");
+                        }
+                    }
+                    for (Element p : paragraphElements) {
+                        if (!p.text().contains("Previous Chapter") && !p.text().contains("Next Chapter")) {
+                            mainText += p.text().trim() + "\n\n";
+                        }
+                    }
+
+                    readingPage.setChapterLink(mLink); // link to chapter
+                    readingPage.setChapterHeader(chapterHeader); // chapter header
+                    readingPage.setChapterPrevLink(prevLink); // prev link
+                    readingPage.setChapterNextLink(nextLink); // next link
+                    readingPage.setChapterText(mainText); // novel text
+
+                    if (readingPage.illegalState()) { // check if some values are not set
+                        return null; // pass null to onPostExecute, so calling activity can handle error loading
+                    }
+
+                    novelInfo.add(readingPage);
+
+                } catch (IOException IOE) {
+                    Log.e("ReadingActivity -IOE-", "" + IOE);
+                    return null; // pass null to onPostExecute, so calling activity can handle error loading
+                }
+                return novelInfo;
+            }
+
+            @Override
+            public void deliverResult(List<ReadingPage> data) {
+                mNovelInfo = data;
+                super.deliverResult(mNovelInfo);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<ReadingPage>> loader, List<ReadingPage> data) {
+        if (data == null) {
+            errorLoading();
+            return;
+        }
+        setNovelText(data.get(0)); // only one element
+        progress.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<ReadingPage>> loader) {
+
     }
 }

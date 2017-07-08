@@ -1,6 +1,10 @@
 package com.example.samue.jianghureader.data;
 
+import android.content.AsyncTaskLoader;
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.v4.content.Loader;
 import android.util.Log;
 
 import com.example.samue.jianghureader.model.Chapter;
@@ -28,7 +32,8 @@ public class WebParse {
     private static final String LOG_ID = WebParse.class.getSimpleName();
 
 
-    public WebParse() {}
+    public WebParse() {
+    }
 
     // -----------------MainActivity------------------------------------------------------------
 
@@ -111,7 +116,9 @@ public class WebParse {
                         chapterList.add(new Chapter(linkElement.text(), linkElement.attr("href")));
                     }
                 }
-            } catch (IOException IOE) { Log.e("ChapterActivity -IOE-", "" + IOE);}
+            } catch (IOException IOE) {
+                Log.e("ChapterActivity -IOE-", "" + IOE);
+            }
             return chapterList;
         }
 
@@ -165,8 +172,7 @@ public class WebParse {
                 for (Element link : links) {
                     if (link.text().equals("Previous Chapter") && prevLink.length() < 1) {
                         prevLink += link.attr("href");
-                    }
-                    else if (link.text().equals("Next Chapter") && nextLink.length() < 1) {
+                    } else if (link.text().equals("Next Chapter") && nextLink.length() < 1) {
                         nextLink += link.attr("href");
                     }
                 }
@@ -201,6 +207,8 @@ public class WebParse {
             webParsingInterface.finishedLoading(result);
         }
     }
-
-
 }
+
+
+
+
