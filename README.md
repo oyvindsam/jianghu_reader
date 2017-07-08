@@ -4,6 +4,8 @@ Features:
 -Save favorites
 -Easy, clean UI
 -Tap to scroll 
+-Load last read chapter (fab button)
+-Load chapter from link (overflow menu), ps. chapter must match novel
 
 Test .apk is in "Additional files" folder if you want to try, or build yourself. 
 
