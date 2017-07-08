@@ -446,6 +446,11 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
 
     // ----------------------------------------------------------------------------------
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_reading, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -562,4 +567,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     public void onLoaderReset(Loader<List<ReadingPage>> loader) {
 
     }
+
+
 }
