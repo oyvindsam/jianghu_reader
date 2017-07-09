@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -239,7 +241,7 @@ public class NovelsFragment extends Fragment {
             return;
         }
 
-        Thread thread = new Thread() { // fix for skipping frames
+        new Handler(Looper.getMainLooper()).post(new Runnable() { // fix for skipping frames
             @Override
             public void run() {
                 ContentValues values = new ContentValues();
@@ -252,13 +254,10 @@ public class NovelsFragment extends Fragment {
                             values
                     );
                 }
+                mProgressBar.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Reset complete", Toast.LENGTH_SHORT).show();
             }
-        };
-        thread.start();
-
-        mProgressBar.setVisibility(View.GONE);
-        Toast.makeText(getContext(), "Reset complete", Toast.LENGTH_SHORT).show();
-
+        });
     }
 
     private void errorLoading() {
