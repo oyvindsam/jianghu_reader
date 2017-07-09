@@ -28,6 +28,7 @@ This class hold 3 inner classes which is responsible for fetching (scraping) dat
 with Jsoup. Alle 3 classes take in a WebParsingInterface<E> which has 2 methods, startLoading() and
 finishedLoading(List<E>).
  */
+/*
 public class WebParse {
 
     private static final String LOG_ID = WebParse.class.getSimpleName();
@@ -264,7 +265,7 @@ public class WebParse {
         }
     }
 }
-
+*/
 
 
 

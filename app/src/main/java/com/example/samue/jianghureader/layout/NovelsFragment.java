@@ -2,7 +2,6 @@ package com.example.samue.jianghureader.layout;
 
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -21,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -29,15 +27,12 @@ import android.widget.Toast;
 
 import com.example.samue.jianghureader.ChapterActivity;
 import com.example.samue.jianghureader.MainActivity;
-import com.example.samue.jianghureader.SettingsActivity;
-import com.example.samue.jianghureader.data.WebParse;
 import com.example.samue.jianghureader.data.WebParsingInterface;
 import com.example.samue.jianghureader.model.Novel;
 import com.example.samue.jianghureader.data.NovelCursorAdapter;
 import com.example.samue.jianghureader.R;
 import com.example.samue.jianghureader.data.NovelContract;
 import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
-import com.example.samue.jianghureader.model.ReadingPage;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -49,7 +44,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.util.Log.v;
-import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
 import static com.example.samue.jianghureader.MainActivity.WUXIAWORLD;
 
 /**
@@ -58,7 +52,6 @@ import static com.example.samue.jianghureader.MainActivity.WUXIAWORLD;
 
 // hoved novelle siden, fragment nr 2
 public class NovelsFragment extends Fragment implements
-        /*LoaderManager.LoaderCallbacks<Cursor>,*/
         WebParsingInterface<Novel> {
 
     private static final String LOG_ID = NovelsFragment.class.getSimpleName();
@@ -67,8 +60,8 @@ public class NovelsFragment extends Fragment implements
     View rootView;
     ImageView imgBtnAdd;
     private NovelCursorAdapter mCursorAdapter;
-    private static int CURSOR_LOADER_ID = 1;
-    private static int WEBPARSE_LOADER_ID = 2;
+    private int CURSOR_LOADER_ID = 1;
+    private int WEBPARSE_NOVEL_LOADER = 2;
 
     MainActivity context;
     ProgressBar progress;
@@ -123,7 +116,7 @@ public class NovelsFragment extends Fragment implements
         );
 
         context.getSupportLoaderManager().initLoader(CURSOR_LOADER_ID, null, cursorLoaderListener);
-        //context.getSupportLoaderManager().initLoader(WEBPARSE_LOADER_ID, null, webParserLoader);
+        //context.getSupportLoaderManager().initLoader(WEBPARSE_NOVEL_LOADER, null, webParseNovelLoader);
 
         if (cursor != null && cursor.getCount() < 1) { // null elements in database, start loading
             //WEBPARSE.parseNovelLinks(WUXIAWORLD, this);
@@ -133,7 +126,7 @@ public class NovelsFragment extends Fragment implements
         return rootView;
     }
 
-    private LoaderManager.LoaderCallbacks<List<Novel>> webParserLoader = new LoaderManager.LoaderCallbacks<List<Novel>>() {
+    private LoaderManager.LoaderCallbacks<List<Novel>> webParseNovelLoader = new LoaderManager.LoaderCallbacks<List<Novel>>() {
         @Override
         public Loader<List<Novel>> onCreateLoader(int id, final Bundle args) {
             return new AsyncTaskLoader<List<Novel>>(context) {
@@ -204,7 +197,7 @@ public class NovelsFragment extends Fragment implements
     public void restartWebParseLoader() {
         Bundle bundle = new Bundle();
         bundle.putString("link", WUXIAWORLD);
-        context.getSupportLoaderManager().initLoader(WEBPARSE_LOADER_ID, bundle, webParserLoader);
+        context.getSupportLoaderManager().initLoader(WEBPARSE_NOVEL_LOADER, bundle, webParseNovelLoader);
     }
 
     @Override

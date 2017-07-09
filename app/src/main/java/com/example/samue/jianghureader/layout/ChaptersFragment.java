@@ -10,7 +10,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
@@ -36,6 +39,7 @@ import com.example.samue.jianghureader.ChapterAdapter;
 import com.example.samue.jianghureader.R;
 import com.example.samue.jianghureader.ReadingActivity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +49,11 @@ import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_NAME;
 import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
 import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 /**
  * Created by samue on 11.04.2017.
  */
@@ -52,8 +61,7 @@ import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
 public class ChaptersFragment extends Fragment implements WebParsingInterface<Chapter>,
         SharedPreferences.OnSharedPreferenceChangeListener  {
 
-    private static final int CURSOR_NOVEL_NAME = 0;
-    private static final int CURSOR_NOVEL_LINK = 1;
+    private static final int WEBPARSE_CHAPTER_LOADER = 3;
     private static final String LOG_ID = ChaptersFragment.class.getSimpleName();
 
 
@@ -145,7 +153,12 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
 
         progress.setVisibility(View.VISIBLE);
 
-        WEBPARSE.parseChapterLinks(novelToCLink, this);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("link", novelToCLink);
+        mContext.getSupportLoaderManager().initLoader(WEBPARSE_CHAPTER_LOADER, bundle, webParseChapterLoader);
+
+        //WEBPARSE.parseChapterLinks(novelToCLink, this);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         mListChaptersAsc = sharedPreferences.getBoolean(getString(R.string.pref_list_asc_key),
@@ -154,6 +167,62 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
 
         return rootView;
     }
+
+    private LoaderManager.LoaderCallbacks<List<Chapter>> webParseChapterLoader = new LoaderManager.LoaderCallbacks<List<Chapter>>() {
+        @Override
+        public Loader<List<Chapter>> onCreateLoader(int id, final Bundle args) {
+            return new AsyncTaskLoader<List<Chapter>>(mContext) {
+                String mLink = args.getString("link");
+                List<Chapter> chapterList = null;
+
+                @Override
+                protected void onStartLoading() {
+                    if (chapterList != null) {
+                        deliverResult(chapterList);
+                    } else {
+                        forceLoad();
+                    }
+                }
+
+                @Override
+                public List<Chapter> loadInBackground() {
+                    List<Chapter> tempChapterList = new ArrayList<>();
+
+                    try {
+                        Document doc = Jsoup.connect(mLink).get();
+
+                        Elements elements = doc.select("div[itemprop=articleBody]"); // area where links are
+                        Elements linkElements = elements.select("a[href]"); // all links
+                        for (Element linkElement : linkElements) {
+                            if (linkElement.text().contains("Chapter")) { // if link text contains chapter --> add
+                                tempChapterList.add(new Chapter(linkElement.text(), linkElement.attr("href")));
+                            }
+                        }
+                    } catch (IOException IOE) {
+                        Log.e("ChapterActivity -IOE-", "" + IOE);
+                    }
+                    return tempChapterList;
+                }
+
+                @Override
+                public void deliverResult(List<Chapter> data) {
+                    chapterList = data;
+                    super.deliverResult(chapterList);
+                }
+            };
+        }
+
+        @Override
+        public void onLoadFinished(Loader<List<Chapter>> loader, List<Chapter> data) {
+            setChapterLinks(data);
+            progress.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<List<Chapter>> loader) {
+
+        }
+    };
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
