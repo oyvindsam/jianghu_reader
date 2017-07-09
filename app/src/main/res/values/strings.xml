@@ -22,7 +22,12 @@
     <string name="pref_list_asc_summary">Ascending</string>
     <string name="pref_list_desc_summary">Descending</string>
 
-<string name="action_share_chapter_link">Share chapter link</string>
+    <string name="pref_text_size_key">text_size</string>
+    <string name="pref_text_size_label">Set text size</string>
+    <string name="pref_text_size_default">15.0f</string>
+
+
+    <string name="action_share_chapter_link">Share chapter link</string>
 
 
 

@@ -2,14 +2,18 @@ package com.example.samue.jianghureader;
 
 import android.annotation.SuppressLint;
 //import android.content.AsyncTaskLoader;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.net.Uri;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 
 //import android.support.v4.app.LoaderManager;
@@ -20,6 +24,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
@@ -33,9 +38,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.samue.jianghureader.data.NovelContract;
 import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
 import com.example.samue.jianghureader.data.WebParse;
 import com.example.samue.jianghureader.data.WebParsingInterface;
+import com.example.samue.jianghureader.layout.ChaptersFragment;
 import com.example.samue.jianghureader.model.ReadingPage;
 
 import org.jsoup.Jsoup;
@@ -52,7 +59,8 @@ import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
 
 
 public class ReadingActivity extends AppCompatActivity implements WebParsingInterface<ReadingPage>,
-        LoaderCallbacks<List<ReadingPage>> {
+        LoaderCallbacks<List<ReadingPage>>,
+        SharedPreferences.OnSharedPreferenceChangeListener  {
 
     private static final String LOG_ID = ReadingActivity.class.getSimpleName();
     public static final String CHAPTER_LINK = "chapter_link";
@@ -69,7 +77,7 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     TextView novelTextView, chapterHeaderTextView, prevTopTextView, nextTopTextView, prevBottomTextView,
             nextBottomTextView;
     ProgressBar progress;
-    private boolean mShowNavigationHint;
+    private float mTextSize;
 
     int xCor, yCor, maxWidth, maxHeight;
 
@@ -186,14 +194,13 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
             }
         });
 
-
         // touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
 
         // Registers touch events relative to screen and does one of 3: page up, toggle immersive
         // mode, page down.
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
-        display.getSize(size);
+        display.getRealSize(size);
         maxWidth = size.x;
         maxHeight = size.y;
 
@@ -203,6 +210,8 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     xCor = (int) event.getRawX();
                     yCor = (int) event.getRawY();
+                    Log.v(LOG_ID, "Screen COR x,y: " + xCor + ", " + yCor);
+
                 }
                 return false;
             }
@@ -215,6 +224,7 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
                 // compute x,y coordinates relative to screen. (based on pixel touch location)
                 int touchLocationY =  (int) Math.floor(((double) yCor / maxHeight) * 100);
                 int touchLocationX = (int) Math.floor(((double) xCor / maxWidth) * 100);
+                int ySlop = (int) (maxHeight*0.025);
 
                 if ((touchLocationY > 30 && touchLocationY < 70) && (touchLocationX > 30 &&
                         touchLocationX < 70)) { // middle of screen 30 - 70% both x, y
@@ -222,12 +232,20 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
                     scrollView.setVerticalScrollBarEnabled(true);
                 }
                 else if (touchLocationY < 40) { // Upper part of screen 0 - 40%
-                    scrollView.scrollBy(0, -(maxHeight - 10)); // scroll up
+                    scrollView.scrollBy(0, -(maxHeight - ySlop)); // scroll up
                 } else { // lower part of screen 70% +
-                    scrollView.scrollBy(0, +(maxHeight - 10)); // scroll down
+                    scrollView.scrollBy(0, +(maxHeight - ySlop)); // scroll down
                 }
             }
         });
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String textSizeString = sharedPreferences.getString(getString(R.string.pref_text_size_key),
+                getString(R.string.pref_text_size_default));
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        mTextSize = Float.valueOf(textSizeString);
+        Log.v(LOG_ID, "Text Size: " + mTextSize);
+        novelTextView.setTextSize(mTextSize);
 
 
         prevTopTextView.setOnClickListener(new View.OnClickListener() {
@@ -269,20 +287,86 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
             mVisible = savedInstanceState.getBoolean("navigation_visible");
             //scrollView.setScrollY(savedInstanceState.getInt("scroll"));
         } else {
+ /*
+            Received intent ------------------------------------------------------------------------
+            Behold!! Shit happens here..
+            Basically:
+            1. If intent matches ACTION_VIEW, get uri which is a link to (hopefully) a WW novel.
+            2. Compare incoming novel with novels in database, if OK we basically have correct URI and chapterLink
+            3. Then, check if the link is to the ToC page instead of a chapter, if it is start ChapterActivity
+            4. If the first if test did not pass, the intent is a "normal" intent from ChaptersFragment
+            5. We have all req data and can start loading data and updating database.
 
-            // Received intent ------------------------------------------------------------------------
+            */
             Intent intent = getIntent();
-            chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
-            mUri = intent.getData();
-            Log.v(LOG_ID, mUri.toString());
+            if (Intent.ACTION_VIEW.equals(intent.getAction())) { // implicit intent
+                Uri data = intent.getData();
+                chapterLink = data.toString();
+                Log.v(LOG_ID, "Uri is: " + data);
+                mUri = findNovelUri(chapterLink);
+                if (mUri == null) { // Could not find novel in database, exit
+                    errorLoading();
+                    return;
+                }
+                if (chapterLink.endsWith("-index/")) { // dirty hack in case intent is to chapter page
+                    Intent intentChapter = new Intent(this, ChapterActivity.class);
+                    intentChapter.putExtra(EXTRA_NOVEL_LINK, chapterLink);
+                    intentChapter.setData(mUri); // important
+                    this.startActivity(intentChapter);
+                    this.finish(); // close this activity
+                    return; // return so the activity does not run in background
+                }
+            } else { // "normal" intent
 
-            //WEBPARSE.parseReadingPage(chapterLink, this);
+                chapterLink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
+                mUri = intent.getData();
+                Log.v(LOG_ID, mUri.toString());
+            }
+
+            //WEBPARSE.parseReadingPage(chapterLink, this); // old implementation
             LoaderCallbacks<List<ReadingPage>> callback = ReadingActivity.this;
             Bundle bundle = new Bundle();
             bundle.putString("link", chapterLink);
             getSupportLoaderManager().initLoader(LOADER_ID, bundle, callback);
         }
 
+    }
+
+    /*
+    Finds and returns a uri to matching novel link
+    1. Get a cursor with all novels
+    2. Go send each novelTocLin to static method novelIsSame in ChaptersFragment
+    3. If match --> return URI from matching element in database
+     */
+    private Uri findNovelUri(String testLink) {
+        String[] projection = {
+                NovelEntry._ID,
+                NovelEntry.COLUMN_NOVEL_TOC_LINK,
+        };
+
+        Cursor cursor = getContentResolver().query(
+                NovelEntry.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int linkColumnIndex = cursor.getColumnIndex(NovelEntry.COLUMN_NOVEL_TOC_LINK);
+            int idColumnIndex = cursor.getColumnIndex(NovelEntry._ID);
+            while(cursor.moveToNext()) {
+                String cursorNovelLink = cursor.getString(linkColumnIndex);
+                if (ChaptersFragment.novelIsSame(testLink, cursorNovelLink)) {
+                    int id = cursor.getInt(idColumnIndex);
+                    Uri uri = ContentUris.withAppendedId(NovelEntry.CONTENT_URI, id);
+                    cursor.close();
+                    return uri;
+                }
+            }
+            cursor.close();
+        }
+        return null; // link did not match any novel in databse
     }
 
     @Override
@@ -294,7 +378,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
         outState.putString(CHAPTER_TEXT, chapterText);
         outState.putString(NEXT_LINK, nextLink);
         outState.putString(PREV_LINK, prevLink);
-        //outState.putInt("scroll", scrollView.getScrollY());
         outState.putString("uri", mUri.toString());
         outState.putBoolean("navigation_visible", mVisible);
         super.onSaveInstanceState(outState);
@@ -462,6 +545,10 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
             case R.id.action_share_chapter:
                 shareChapterLink();
                 return true;
+            case R.id.action_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -474,6 +561,23 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
                 .setType(mimeType)
                 .setText(chapterLink)
                 .startChooser();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_text_size_key))) {
+            mTextSize = Float.valueOf(sharedPreferences.getString(key,
+                    getString(R.string.pref_text_size_default)));
+            novelTextView.setTextSize(mTextSize);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        // Unregister VisualizerActivity as an OnPreferenceChangedListener to avoid any memory leaks.
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override

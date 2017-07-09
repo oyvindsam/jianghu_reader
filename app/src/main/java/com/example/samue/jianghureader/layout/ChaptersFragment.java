@@ -29,6 +29,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.samue.jianghureader.ChapterActivity;
+import com.example.samue.jianghureader.SettingsActivity;
 import com.example.samue.jianghureader.data.WebParsingInterface;
 import com.example.samue.jianghureader.model.Chapter;
 import com.example.samue.jianghureader.ChapterAdapter;
@@ -159,6 +160,8 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
         if (key.equals(getString(R.string.pref_list_asc_key))) {
             mListChaptersAsc = sharedPreferences.getBoolean(key,
                     getResources().getBoolean(R.bool.pref_list_default));
+            reverseChapters();
+            Log.v(LOG_ID, "pref CHANGED");
         }
     }
 
@@ -214,6 +217,10 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(mContext);
                 return true;
+            case R.id.action_settings:
+                Intent settingsIntent = new Intent(mContext, SettingsActivity.class);
+                startActivity(settingsIntent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -236,7 +243,7 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
                     }
                     Toast.makeText(getContext(), "No link found", Toast.LENGTH_SHORT).show();
                     return;
-                } else if (!novelIsSame(chapterLink)){
+                } else if (!novelIsSame(novelToCLink, chapterLink)){
                     if (dialog != null) {
                         dialog.dismiss();
                     }
@@ -266,12 +273,12 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
         alertDialog.show();
     }
 
-    private boolean novelIsSame(String otherLink) {
+    public static boolean novelIsSame(String link, String otherLink) {
         String temp1 = "";
         String temp2 = "";
-        int indexStart = novelToCLink.indexOf(".com/") +5;
-        int indexEnd = novelToCLink.substring(indexStart).indexOf('/') + indexStart;
-        temp1 = novelToCLink.substring(indexStart, indexEnd);
+        int indexStart = link.indexOf(".com/") +5;
+        int indexEnd = link.substring(indexStart).indexOf('/') + indexStart;
+        temp1 = link.substring(indexStart, indexEnd);
         Log.v(LOG_ID, "temp1: " + temp1);
 
 

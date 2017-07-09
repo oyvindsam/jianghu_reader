@@ -1,6 +1,7 @@
 package com.example.samue.jianghureader;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.design.widget.TabLayout;
@@ -69,29 +70,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
+                return true;
+        }
         return super.onOptionsItemSelected(item);
     }
-
-
-    public FavoriteFragment getFavoriteFragment() {
-        return (FavoriteFragment) fragmentAdapter.getItem(FAVORITE_FRAGMENT);
-    }
+    
 
     public NovelsFragment getNovelsFragment() {
         return (NovelsFragment) fragmentAdapter.getItem(NOVELS_FRAGMENT);
     }
-
-    public void updateNovelsFragment(List<Novel> novelLinks) {
-        novelsFragment = (NovelsFragment) fragmentAdapter.getItem(1); //NovelsFragment
-    }
-
-    public void updateFavoriteFragment() {
-        favoriteFragment = (FavoriteFragment) fragmentAdapter.getItem(0); //NovelsFragment
-    }
-
-
-
-
-
 
 }

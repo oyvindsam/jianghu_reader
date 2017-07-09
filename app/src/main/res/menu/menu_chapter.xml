@@ -24,4 +24,9 @@
     <item
         android:id="@+id/action_set_last_chapter"
         android:title="@string/action_clear_db" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
 </menu>

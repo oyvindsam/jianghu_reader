@@ -125,10 +125,6 @@ public class NovelsFragment extends Fragment implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // User clicked on a menu option in the app bar overflow menu
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                Intent settingsIntent = new Intent(context, SettingsActivity.class);
-                startActivity(settingsIntent);
-                return true;
             case R.id.action_reset:
                 WEBPARSE.parseNovelLinks(WUXIAWORLD, this);
 

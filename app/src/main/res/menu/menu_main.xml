@@ -17,13 +17,14 @@
     tools:context=".ChapterActivity">
 
     <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/action_reset"
         android:title="@string/action_reset"
         app:showAsAction="never"
         />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
 
 </menu>
