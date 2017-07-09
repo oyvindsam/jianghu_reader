@@ -191,13 +191,8 @@ public class NovelsFragment extends Fragment implements
 
         @Override
         public void onLoadFinished(Loader<List<Novel>> loader, List<Novel> data) {
-            if (data == null) {
-                errorLoading();
-                return;
-            }
             progress.setVisibility(View.INVISIBLE);
             finishedLoading(data);
-
         }
 
         @Override
@@ -274,27 +269,34 @@ public class NovelsFragment extends Fragment implements
     }
 
     @Override
-    public void finishedLoading(List<Novel> novels) {
+    public void finishedLoading(final List<Novel> novels) {
         if (novels == null) { // check if error loading data
             errorLoading();
             return;
         }
 
+        /*
         context.getContentResolver().delete(
                 NovelEntry.CONTENT_URI,
                 null,
                 null
-        );
-        ContentValues values = new ContentValues();
-        for (Novel n : novels) {
-            values.put(NovelEntry.COLUMN_NOVEL_NAME, n.getNovelName());
-            values.put(NovelEntry.COLUMN_NOVEL_TOC_LINK, n.getNovelLink());
+        ); */
+        Thread thread = new Thread() { // fix for skipping frames
+            @Override
+            public void run() {
+                ContentValues values = new ContentValues();
+                for (Novel n : novels) {
+                    values.put(NovelEntry.COLUMN_NOVEL_NAME, n.getNovelName());
+                    values.put(NovelEntry.COLUMN_NOVEL_TOC_LINK, n.getNovelLink());
 
-            context.getContentResolver().insert(
-                    NovelEntry.CONTENT_URI,
-                    values
-            );
-        }
+                    context.getContentResolver().insert(
+                            NovelEntry.CONTENT_URI,
+                            values
+                    );
+                }
+            }
+        };
+        thread.start();
 
         progress.setVisibility(View.GONE);
         Toast.makeText(getContext(), "Reset complete", Toast.LENGTH_SHORT).show();
