@@ -28,8 +28,6 @@ import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_URI;
 
 public class ChapterActivity extends AppCompatActivity {
 
-    public ChaptersFragment chaptersFragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +39,7 @@ public class ChapterActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        chaptersFragment = new ChaptersFragment();
+        ChaptersFragment chaptersFragment = new ChaptersFragment();
 
         if (findViewById(R.id.fragment_container_chapters) != null) {
             if(savedInstanceState != null) {

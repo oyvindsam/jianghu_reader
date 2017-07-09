@@ -1,6 +1,5 @@
 package com.example.samue.jianghureader.layout;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,7 +13,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.text.TextUtilsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -45,8 +43,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_LINK;
-import static com.example.samue.jianghureader.MainActivity.EXTRA_NOVEL_NAME;
-import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
+
 import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
 
 import org.jsoup.Jsoup;
@@ -58,18 +55,17 @@ import org.jsoup.select.Elements;
  * Created by samue on 11.04.2017.
  */
 
-public class ChaptersFragment extends Fragment implements WebParsingInterface<Chapter>,
-        SharedPreferences.OnSharedPreferenceChangeListener  {
+public class ChaptersFragment extends Fragment implements
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int WEBPARSE_CHAPTER_LOADER = 3;
     private static final String LOG_ID = ChaptersFragment.class.getSimpleName();
 
 
-    private String novelName, novelToCLink, novelLastChapterLink;
-    private GridView novelChaptersGridView;
-    private ProgressBar progress;
-    private ChapterAdapter adapter;
-    private List<Chapter> chapterLinks;
+    private String mNovelName, mNovelTocLink, mNovelLastChapterLink;
+    private ProgressBar mProgressBar;
+    private ChapterAdapter mAdapter;
+    private List<Chapter> mChapterList;
     private Uri mUri;
     private boolean mListChaptersAsc = true;
     private ChapterActivity mContext;
@@ -88,8 +84,8 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
         mContext = (ChapterActivity) getContext();
         setHasOptionsMenu(true);
 
-        progress = (ProgressBar) rootView.findViewById(R.id.loading_spinner_chapter);
-        novelChaptersGridView = (GridView) rootView.findViewById(R.id.chapter_list);
+        mProgressBar = (ProgressBar) rootView.findViewById(R.id.loading_spinner_chapter);
+        GridView novelChaptersGridView = (GridView) rootView.findViewById(R.id.chapter_list);
 
         // Get URI, get cursor, extract data from cursor
         Intent intent = getActivity().getIntent(); // get intent from chapterActivity
@@ -107,43 +103,57 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
                 null,
                 null
         );
-        cursor.moveToFirst();
-        int novelNameIndex = cursor.getColumnIndex(NovelEntry.COLUMN_NOVEL_NAME);
-        int novelToCLinkIndex = cursor.getColumnIndex(NovelEntry.COLUMN_NOVEL_TOC_LINK);
-        int novelLastChapterLinkIndex = cursor.getColumnIndex(NovelEntry.COLUMN_NOVEL_LAST_CHAPTER_LINK);
 
-        novelName = cursor.getString(novelNameIndex);
-        novelToCLink = cursor.getString(novelToCLinkIndex);
-        novelLastChapterLink = cursor.getString(novelLastChapterLinkIndex);
+        if (cursor != null) {
+            try {
+                cursor.moveToFirst();
+                int novelNameIndex = cursor.getColumnIndex(NovelEntry.COLUMN_NOVEL_NAME);
+                int novelToCLinkIndex = cursor.getColumnIndex(NovelEntry.COLUMN_NOVEL_TOC_LINK);
+                int novelLastChapterLinkIndex = cursor.getColumnIndex(NovelEntry.COLUMN_NOVEL_LAST_CHAPTER_LINK);
 
-        getActivity().setTitle(novelName);
+                mNovelName = cursor.getString(novelNameIndex);
+                mNovelTocLink = cursor.getString(novelToCLinkIndex);
+                mNovelLastChapterLink = cursor.getString(novelLastChapterLinkIndex);
+            } catch (Exception e) {
+                e.printStackTrace();
+                mContext.finish();
+                return null;
+            } finally {
+                cursor.close();
+            }
+        } else {
+            mContext.finish();
+            return null;
+        }
+
+
+        getActivity().setTitle(mNovelName);
 
         FloatingActionButton fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
-        if (!TextUtils.isEmpty(novelLastChapterLink)) {
+        if (!TextUtils.isEmpty(mNovelLastChapterLink)) {
             fab.setVisibility(View.VISIBLE);
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
                     Intent intent = new Intent(getContext(), ReadingActivity.class);
-                    intent.putExtra(EXTRA_NOVEL_LINK, novelLastChapterLink);
+                    intent.putExtra(EXTRA_NOVEL_LINK, mNovelLastChapterLink);
                     intent.setData(mUri);
                     startActivity(intent);
                 }
             });
         }
 
-
-        chapterLinks = new ArrayList<>();
-        adapter = new ChapterAdapter(rootView.getContext(), chapterLinks);
-        novelChaptersGridView.setAdapter(adapter);
+        mChapterList = new ArrayList<>();
+        mAdapter = new ChapterAdapter(rootView.getContext(), mChapterList);
+        novelChaptersGridView.setAdapter(mAdapter);
 
         novelChaptersGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getContext(), ReadingActivity.class);
                 // link to chapter
-                intent.putExtra(EXTRA_NOVEL_LINK, chapterLinks.get(position).getChapterLink());
+                intent.putExtra(EXTRA_NOVEL_LINK, mChapterList.get(position).getChapterLink());
                 // uri so we can save last chapter read in database
                 intent.setData(mUri);
                 Log.v(LOG_ID, mUri.toString());
@@ -151,14 +161,9 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
             }
         });
 
-        progress.setVisibility(View.VISIBLE);
-
-
         Bundle bundle = new Bundle();
-        bundle.putString("link", novelToCLink);
+        bundle.putString("link", mNovelTocLink);
         mContext.getSupportLoaderManager().initLoader(WEBPARSE_CHAPTER_LOADER, bundle, webParseChapterLoader);
-
-        //WEBPARSE.parseChapterLinks(novelToCLink, this);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         mListChaptersAsc = sharedPreferences.getBoolean(getString(R.string.pref_list_asc_key),
@@ -172,14 +177,15 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
         @Override
         public Loader<List<Chapter>> onCreateLoader(int id, final Bundle args) {
             return new AsyncTaskLoader<List<Chapter>>(mContext) {
-                String mLink = args.getString("link");
-                List<Chapter> chapterList = null;
+                String novelLink = args.getString("link");
+                List<Chapter> tempChapterList = null;
 
                 @Override
                 protected void onStartLoading() {
-                    if (chapterList != null) {
-                        deliverResult(chapterList);
+                    if (tempChapterList != null) {
+                        deliverResult(tempChapterList);
                     } else {
+                        mProgressBar.setVisibility(View.VISIBLE);
                         forceLoad();
                     }
                 }
@@ -189,7 +195,7 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
                     List<Chapter> tempChapterList = new ArrayList<>();
 
                     try {
-                        Document doc = Jsoup.connect(mLink).get();
+                        Document doc = Jsoup.connect(novelLink).get();
 
                         Elements elements = doc.select("div[itemprop=articleBody]"); // area where links are
                         Elements linkElements = elements.select("a[href]"); // all links
@@ -206,21 +212,21 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
 
                 @Override
                 public void deliverResult(List<Chapter> data) {
-                    chapterList = data;
-                    super.deliverResult(chapterList);
+                    tempChapterList = data;
+                    super.deliverResult(tempChapterList);
                 }
             };
         }
 
         @Override
         public void onLoadFinished(Loader<List<Chapter>> loader, List<Chapter> data) {
-            setChapterLinks(data);
-            progress.setVisibility(View.GONE);
+            mProgressBar.setVisibility(View.GONE);
+            setmChapterList(data);
         }
 
         @Override
         public void onLoaderReset(Loader<List<Chapter>> loader) {
-
+            //mAdapter.clear();
         }
     };
 
@@ -230,7 +236,6 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
             mListChaptersAsc = sharedPreferences.getBoolean(key,
                     getResources().getBoolean(R.bool.pref_list_default));
             reverseChapters();
-            Log.v(LOG_ID, "pref CHANGED");
         }
     }
 
@@ -242,30 +247,17 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
-    public void setChapterLinks(List<Chapter> newChapterLinks) {
-        adapter.clear();
-        adapter.addAll(newChapterLinks);
+    public void setmChapterList(List<Chapter> newChapterLinks) {
+        mAdapter.clear();
+        mAdapter.addAll(newChapterLinks);
         if (!mListChaptersAsc) {
             reverseChapters();
         }
-        progress.setVisibility(View.INVISIBLE);
     }
 
     public void reverseChapters() {
-        Collections.reverse(chapterLinks);
-        adapter.notifyDataSetChanged();
-    }
-
-
-    @Override
-    public void startLoading() {
-        progress.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void finishedLoading(List<Chapter> chapters) {
-        setChapterLinks(chapters);
-        progress.setVisibility(View.GONE);
+        Collections.reverse(mChapterList);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -312,7 +304,7 @@ public class ChaptersFragment extends Fragment implements WebParsingInterface<Ch
                     }
                     Toast.makeText(getContext(), "No link found", Toast.LENGTH_SHORT).show();
                     return;
-                } else if (!novelIsSame(novelToCLink, chapterLink)){
+                } else if (!novelIsSame(mNovelTocLink, chapterLink)){
                     if (dialog != null) {
                         dialog.dismiss();
                     }

@@ -13,7 +13,6 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,23 +20,18 @@ import android.widget.ListView;
 
 import com.example.samue.jianghureader.ChapterActivity;
 import com.example.samue.jianghureader.MainActivity;
-import com.example.samue.jianghureader.SettingsActivity;
 import com.example.samue.jianghureader.data.NovelCursorAdapter;
 import com.example.samue.jianghureader.R;
 import com.example.samue.jianghureader.data.NovelContract;
 import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
 
-import static com.example.samue.jianghureader.MainActivity.WEBPARSE;
-import static com.example.samue.jianghureader.MainActivity.WUXIAWORLD;
 
-
-public class FavoriteFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+public class FavoriteFragment extends Fragment {
 
     private NovelCursorAdapter mCursorAdapter;
-    private static int LOADER_ID = 0;
+    private static int CURSOR_FAVORITE_LOADER_ID = 4;
 
-    MainActivity context;
+    private MainActivity mContext;
 
     public FavoriteFragment() {
         // Required empty public constructor
@@ -53,9 +47,9 @@ public class FavoriteFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.frag_favorite_list, container, false);
-        context = (MainActivity) getContext();
+        mContext = (MainActivity) getContext();
 
-        context.getSupportLoaderManager().initLoader(LOADER_ID, null, this);
+        mContext.getSupportLoaderManager().initLoader(CURSOR_FAVORITE_LOADER_ID, null, cursorFavoriteNovelsListener);
 
         ListView favoriteListView = (ListView) rootView.findViewById(R.id.novel_list_favorite);
         mCursorAdapter = new NovelCursorAdapter(getContext(), null);
@@ -80,35 +74,37 @@ public class FavoriteFragment extends Fragment implements
         // menu.findItem(R.id.action_reset).setVisible(false);
     }
 
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] projection = {
-                NovelEntry._ID,
-                NovelEntry.COLUMN_NOVEL_NAME,
-                NovelEntry.COLUMN_NOVEL_TOC_LINK,
-                NovelEntry.COLUMN_NOVEL_IS_FAVORITE
+    private LoaderManager.LoaderCallbacks<Cursor> cursorFavoriteNovelsListener = new LoaderManager.LoaderCallbacks<Cursor>() {
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            String[] projection = {
+                    NovelEntry._ID,
+                    NovelEntry.COLUMN_NOVEL_NAME,
+                    NovelEntry.COLUMN_NOVEL_TOC_LINK,
+                    NovelEntry.COLUMN_NOVEL_IS_FAVORITE
+            };
+            String selection = NovelEntry.COLUMN_NOVEL_IS_FAVORITE + "=?";
+            String[] selectionArgs = { "1" };
 
-        };
-        String selection = NovelEntry.COLUMN_NOVEL_IS_FAVORITE + "=?";
-        String[] selectionArgs = { "1" };
+            return new CursorLoader(getContext(),
+                    NovelContract.NovelEntry.CONTENT_URI,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null
+            );
+        }
 
-        return new CursorLoader(getContext(),
-                NovelContract.NovelEntry.CONTENT_URI,
-                projection,
-                selection,
-                selectionArgs,
-                null
-        );
-    }
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+            mCursorAdapter.swapCursor(cursor);
+        }
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        mCursorAdapter.swapCursor(cursor);
-    }
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            mCursorAdapter.swapCursor(null);
+        }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mCursorAdapter.swapCursor(null);
-    }
+    };
 
 }
