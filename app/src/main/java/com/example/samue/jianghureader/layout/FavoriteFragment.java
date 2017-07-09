@@ -81,16 +81,6 @@ public class FavoriteFragment extends Fragment implements
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // User clicked on a menu option in the app bar overflow menu
-        switch (item.getItemId()) {
-            case R.id.action_reset:
-                WEBPARSE.parseNovelLinks(WUXIAWORLD, context.getNovelsFragment()); // novelsFragment handles reloading data
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = {
                 NovelEntry._ID,

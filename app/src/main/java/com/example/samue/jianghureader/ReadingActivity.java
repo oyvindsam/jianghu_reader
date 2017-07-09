@@ -285,7 +285,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
             mUri = Uri.parse(savedInstanceState.getString("uri"));
             setNovelText(rp);
             mVisible = savedInstanceState.getBoolean("navigation_visible");
-            //scrollView.setScrollY(savedInstanceState.getInt("scroll"));
         } else {
  /*
             Received intent ------------------------------------------------------------------------

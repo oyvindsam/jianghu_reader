@@ -75,10 +75,13 @@ public class MainActivity extends AppCompatActivity {
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivity(settingsIntent);
                 return true;
+            case R.id.action_reset:
+                getNovelsFragment().restartWebParseLoader();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
-    
+
 
     public NovelsFragment getNovelsFragment() {
         return (NovelsFragment) fragmentAdapter.getItem(NOVELS_FRAGMENT);

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.view.View;
 
 import com.example.samue.jianghureader.model.Chapter;
 import com.example.samue.jianghureader.model.Novel;
@@ -33,6 +34,61 @@ public class WebParse {
 
 
     public WebParse() {
+    }
+
+    public static class NovelLinksLoader extends AsyncTaskLoader<List<Novel>> {
+
+        String mLink;
+        WebParsingInterface<Novel> webParsingInterface;
+        List<Novel> mNovelInfo = null;
+
+        public NovelLinksLoader(Context context) { //}, WebParsingInterface<Novel> webParsingInterface, String webAddress) {
+            super(context);
+            this.webParsingInterface = webParsingInterface;
+            //mLink = webAddress;
+        }
+
+        @Override
+        protected void onStartLoading() {
+            if (mNovelInfo != null) {
+                deliverResult(mNovelInfo);
+            } else {
+                //startLoading();
+                webParsingInterface.startLoading();
+                forceLoad();
+            }
+        }
+
+        @Override
+        public List<Novel> loadInBackground() {
+            List<Novel> tempNovelNames = new ArrayList<>();
+
+            try {
+                Document doc = Jsoup.connect(mLink).get();
+                Elements elements = doc.select("li[id=menu-item-2165]"); // select menu item
+                Elements linkElements = elements.select("a[href]"); // get all links i an array
+                linkElements.remove(0); // first link redundant
+
+                for (Element linkElement : linkElements) {
+                    if (linkElement.text().contains("(")) { // chinese name inside brackets ()
+                        String[] nameSplit = linkElement.text().split("[(]"); // nameSlipt = { "english", "chinese"}
+                        tempNovelNames.add(new Novel(nameSplit[0].trim(), linkElement.attr("href"))); // english name, link
+                    } else { // if it does not have a chinese name in header
+                        tempNovelNames.add(new Novel(linkElement.text(), linkElement.attr("href")));
+                    }
+                }
+            } catch (IOException IOE) {
+                Log.e("MainActivity -IOE- ", "" + IOE);
+                return null; // pass null to onPostExecute, so calling activity can handle error loading
+            }
+            return tempNovelNames;
+        }
+
+        @Override
+        public void deliverResult(List<Novel> data) {
+            mNovelInfo = data;
+            super.deliverResult(mNovelInfo);
+        }
     }
 
     // -----------------MainActivity------------------------------------------------------------
