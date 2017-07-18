@@ -34,5 +34,3 @@ TODO:
 
 
 
-contact: oyvinsam@stud.ntnu.no
-
