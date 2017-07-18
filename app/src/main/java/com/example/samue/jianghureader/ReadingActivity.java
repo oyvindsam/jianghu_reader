@@ -1,7 +1,6 @@
 package com.example.samue.jianghureader;
 
 import android.annotation.SuppressLint;
-//import android.content.AsyncTaskLoader;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -14,7 +13,6 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 
-//import android.support.v4.app.LoaderManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.ActionBar;
@@ -137,7 +135,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reading);
-        Log.v(LOG_ID, "onCreate called");
 
         ActionBar actionBar = getSupportActionBar();
 
@@ -283,7 +280,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
             if (Intent.ACTION_VIEW.equals(intent.getAction())) { // implicit intent
                 Uri data = intent.getData();
                 mChapterlink = data.toString();
-                Log.v(LOG_ID, "Uri is: " + data);
                 mUri = findNovelUri(mChapterlink);
                 if (mUri == null) { // Could not find novel in database, exit
                     errorLoading();
@@ -301,7 +297,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
 
                 mChapterlink = intent.getStringExtra(EXTRA_NOVEL_LINK); // explicit intent
                 mUri = intent.getData();
-                Log.v(LOG_ID, mUri.toString());
             }
 
             Bundle bundle = new Bundle();
@@ -351,7 +346,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.v(LOG_ID, "onSaveInstanceState called");
 
         outState.putString(CHAPTER_LINK, mChapterlink);
         outState.putString(CHAPTER_HEADER, mChapterHeader);
@@ -437,7 +431,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(LOG_ID, "onResume called");
         delayedHide(AUTO_HIDE_DELAY_MILLIS);
     }
     // --------------------- Fullscreen controls --------------------------------------
@@ -445,28 +438,23 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        Log.v(LOG_ID, "onPostCreate called");
         // Trigger the initial hide() shortly after the activity has been
         // created, to briefly hint to the user that UI controls
         // are available.
         if (savedInstanceState != null && mVisible) { // rotating
-            Log.v(LOG_ID, "onPostC -- hiding... ");
             hide();
         }
     }
 
     private void toggle() {
         if (mVisible) {
-            Log.v(LOG_ID, "toggle called, mVisible TRUE, hiding...");
             hide();
         } else {
-            Log.v(LOG_ID, "toggle called, mVisible FALSE, showing...");
             show();
         }
     }
 
     private void hide() {
-        Log.v(LOG_ID, "Hide called, mVisible: " + mVisible);
         // Hide UI first
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -500,7 +488,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
      * previously scheduled calls.
      */
     private void delayedHide(int delayMillis) {
-        Log.v(LOG_ID, "delayedHide called");
         mVisible = false;
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
@@ -585,7 +572,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
                     String chapterHeader = "";
                     String mainText = "";
                     ReadingPage readingPage = new ReadingPage();
-                    Log.v(LOG_ID, chapterLink);
 
                     if (!chapterLink.startsWith("http://")) { // fix for pasting link without http prefix
                         chapterLink = "http://" + chapterLink;
@@ -623,7 +609,6 @@ public class ReadingActivity extends AppCompatActivity implements WebParsingInte
                         novelInfo.add(readingPage);
 
                     } catch (IOException IOE) {
-                        Log.e("ReadingActivity -IOE-", "" + IOE);
                         return null; // pass null to onPostExecute, so calling activity can handle error loading
                     }
                     return novelInfo;

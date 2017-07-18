@@ -6,7 +6,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -17,8 +16,7 @@ import android.widget.TextView;
 
 import com.example.samue.jianghureader.R;
 import com.example.samue.jianghureader.data.NovelContract.NovelEntry;
-import com.example.samue.jianghureader.layout.FavoriteFragment;
-import com.example.samue.jianghureader.layout.NovelsFragment;
+
 
 /**
  * Created by samue on 12.04.2017.

@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import com.example.samue.jianghureader.data.SimpleFragmentPagerAdapter;
 
-import com.example.samue.jianghureader.layout.FavoriteFragment;
 import com.example.samue.jianghureader.layout.NovelsFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,14 +31,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-        if (!isConnected) {
-            Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
+        hasInternetConnection(this);
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         mFragmentPagerAdapter = new SimpleFragmentPagerAdapter(getSupportFragmentManager(), this);
@@ -52,6 +44,17 @@ public class MainActivity extends AppCompatActivity {
         }
         tabLayout.setupWithViewPager(viewPager);
 
+    }
+
+    public static boolean hasInternetConnection(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        if (!isConnected) {
+            Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     @Override

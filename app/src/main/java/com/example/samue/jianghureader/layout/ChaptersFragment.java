@@ -16,7 +16,6 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,8 +29,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.samue.jianghureader.ChapterActivity;
+import com.example.samue.jianghureader.MainActivity;
 import com.example.samue.jianghureader.SettingsActivity;
-import com.example.samue.jianghureader.data.WebParsingInterface;
 import com.example.samue.jianghureader.model.Chapter;
 import com.example.samue.jianghureader.ChapterAdapter;
 import com.example.samue.jianghureader.R;
@@ -83,6 +82,11 @@ public class ChaptersFragment extends Fragment implements
         View rootView = inflater.inflate(R.layout.activity_chapter, container, false);
         mContext = (ChapterActivity) getContext();
         setHasOptionsMenu(true);
+
+        if (!MainActivity.hasInternetConnection(mContext)) {
+            mContext.finish();
+            return null;
+        }
 
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.loading_spinner_chapter);
         GridView novelChaptersGridView = (GridView) rootView.findViewById(R.id.chapter_list);
@@ -156,7 +160,6 @@ public class ChaptersFragment extends Fragment implements
                 intent.putExtra(EXTRA_NOVEL_LINK, mChapterList.get(position).getChapterLink());
                 // uri so we can save last chapter read in database
                 intent.setData(mUri);
-                Log.v(LOG_ID, mUri.toString());
                 startActivity(intent);
             }
         });
@@ -205,7 +208,6 @@ public class ChaptersFragment extends Fragment implements
                             }
                         }
                     } catch (IOException IOE) {
-                        Log.e("ChapterActivity -IOE-", "" + IOE);
                     }
                     return tempChapterList;
                 }
@@ -317,7 +319,6 @@ public class ChaptersFragment extends Fragment implements
                 intent.putExtra(EXTRA_NOVEL_LINK, chapterLink);
                 // uri so we can save last chapter read in database
                 intent.setData(mUri);
-                Log.v(LOG_ID, mUri.toString());
                 startActivity(intent);
             }
         });
@@ -340,14 +341,12 @@ public class ChaptersFragment extends Fragment implements
         int indexStart = link.indexOf(".com/") +5;
         int indexEnd = link.substring(indexStart).indexOf('/') + indexStart;
         temp1 = link.substring(indexStart, indexEnd);
-        Log.v(LOG_ID, "temp1: " + temp1);
 
 
         int indexStart2 = otherLink.indexOf(".com/") + 5;
         int indexEnd2 = otherLink.substring(indexStart2).indexOf('/') + indexStart2;
         temp2 = otherLink.substring(indexStart2, indexEnd2);
 
-        Log.v(LOG_ID, temp1 + " / " + temp2);
         return temp1.equals(temp2);
     }
 

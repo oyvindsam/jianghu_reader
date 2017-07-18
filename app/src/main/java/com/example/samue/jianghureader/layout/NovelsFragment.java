@@ -14,7 +14,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -74,7 +73,6 @@ public class NovelsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (mRootView != null) {
-            Log.v("InstaReturn", "rootview");
             return mRootView;
         }
         mContext = (MainActivity) getContext();
@@ -91,7 +89,6 @@ public class NovelsFragment extends Fragment {
                 Intent intent = new Intent(getContext(), ChapterActivity.class);
                 Uri uri = ContentUris.withAppendedId(NovelEntry.CONTENT_URI, id);
                 intent.setData(uri);
-                Log.v(LOG_ID, uri.toString());
                 startActivity(intent);
             }
         });
@@ -154,7 +151,6 @@ public class NovelsFragment extends Fragment {
                             }
                         }
                     } catch (IOException IOE) {
-                        Log.e("MainActivity -IOE- ", "" + IOE);
                         return null; // pass null to onPostExecute, so calling activity can handle error loading
                     }
                     return tempNovelNames;
@@ -255,7 +251,7 @@ public class NovelsFragment extends Fragment {
                     );
                 }
                 mProgressBar.setVisibility(View.GONE);
-                Toast.makeText(getContext(), "Reset complete", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Download complete", Toast.LENGTH_SHORT).show();
             }
         });
     }
