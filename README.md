@@ -3,7 +3,7 @@ This is a project i have been working on since Feb 2017. I read a lot of webnove
 
 
 
-DOWNLOAD: https://github.com/oyvindsam/jianghu_reader/raw/master/Additional%20files/jianghu_reader_r1.apkk
+DOWNLOAD: https://github.com/oyvindsam/jianghu_reader/raw/master/Additional%20files/jianghu_reader_r1.apk
 
 
 
