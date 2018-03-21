@@ -1,7 +1,5 @@
 # jianghu_reader
-This is a project i have been working on since Feb 2017. I read a lot of webnovels and wanted to make the reading experience on mobile better, fitting my needs. As this is my first step into Android development I know there is a lot of stuff to improve, and hopefully I will make time to update this project in the future.
-
-
+This is a project i have been working on since Feb 2017. I read a lot of webnovels and wanted to make the reading experience on mobile better, fitting my needs. 
 
 DOWNLOAD: https://github.com/oyvindsam/jianghu_reader/raw/master/Additional%20files/jianghu_reader_r1.apk
 
